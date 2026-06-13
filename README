@@ -1,0 +1,13 @@
+Данный репозиторий используется для хранения учебных заданий по Java и тестированию.
+
+Каждое задание находится в отдельной папке. Внутри каждой папки может быть свой README.md с описанием конкретного задания.
+
+Maxim-s-java-tests
+├── iteration-2-api-test-cases
+│   ├── README.md
+│   └── postman
+│       └── nbank-iteration-2-tests.postman_collection.json
+└── README.md
+
+Домашние задания
+Iteration 2 - API Test Case Design (папка: iteration-2-api-test-cases)
