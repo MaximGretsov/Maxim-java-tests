@@ -1,0 +1,2536 @@
+{
+  "info": {
+    "_postman_id": "b5230127-941a-40f5-99ae-4c2e797aa5e4",
+    "name": "Nbank Iteration2 tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25137237"
+  },
+  "item": [
+    {
+      "name": "Deposit",
+      "item": [
+        {
+          "name": "Positive deposit  cases",
+          "item": [
+            {
+              "name": "deposit valid amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ==",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit minimum allowed sum",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 0.01\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit maximum allowed sum",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 5000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "verify transaction after deposit",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/1/transactions",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "1",
+                    "transactions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit amount below maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 4999.99\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negative deposit cases",
+          "item": [
+            {
+              "name": "deposit 0 amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit negative amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": -1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit amount above maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 5000.01\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit to another user's account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 2,\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit to non-existent account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 99,\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit with invalid Basic Auth",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFvcmQhMQ"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit without account id",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit without balance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit with string  account id",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"one\",\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit with string amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "JSESSIONID=5C1EE3514453ED4B18E7B90EDDB30F28"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": \"one hundred\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit without authorization",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transfer",
+      "item": [
+        {
+          "name": "Positive transfer cases",
+          "item": [
+            {
+              "name": "transfer between own accounts",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer to another user's account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 3,\n  \"amount\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer minimum positive amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 0.01\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer maximum allowed amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 10000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "verify transactions after transfer",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/1/transactions",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "1",
+                    "transactions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer amount below maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 9999.99\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negative transfer cases",
+          "item": [
+            {
+              "name": "transfer zero amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer negative amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": -50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer amount above maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 10000.01\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer amount greater than sender balance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 10000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                },
+                "description": "Before executing the request, the test data must be prepared: the sender account balance must be lower than the amount specified in the transfer request. This condition is required to verify the scenario where the transfer is rejected due to insufficient funds in the sender account.EndFragment"
+              },
+              "response": []
+            },
+            {
+              "name": "transfer from another user's account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 3,\n  \"receiverAccountId\": 1,\n  \"amount\": 10000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer from non-existent account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 99,\n  \"receiverAccountId\": 1,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer to non-existent account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 3,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer without authorization",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer with invalid Basic Auth",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4a3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer without senderAccountId",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"receiverAccountId\": 2,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer without receiverAccountId",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer without amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer with string amount",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": \"one hundred\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer with string senderAccountId",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": \"one\",\n  \"receiverAccountId\": 2,\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer with string receiverAccountId",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": \"two\",\n  \"amount\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Change name in profile",
+      "item": [
+        {
+          "name": "Positive change name cases",
+          "item": [
+            {
+              "name": "Successfully update name with letters and spaces only",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ==",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Verify profile name update",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ==",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negative change name cases",
+          "item": [
+            {
+              "name": "Fail to update name to three words",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Name Three\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name to a single word",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name with an empty field",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with a leading space",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \" New Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with a trailing space",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Name \"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name with spaces only",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \" \"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with special characters",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Na%me\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with digits",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Na1me\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with a hyphen",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Na-me\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update two-word name with double spaces between words",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New  Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name with null value",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name when the name field is missing",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name without authorization",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fail to update name with invalid Basic Auth",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06zc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"New Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/customer/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "customer",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get admin's token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:4111/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4111",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Basic YWRtaW46YWRtaW4=",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"Maxim\",\n    \"password\": \"Password!1\",\n    \"role\": \"USER\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:4111/api/v1/admin/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4111",
+          "path": [
+            "api",
+            "v1",
+            "admin",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"Maxim\",\n  \"password\": \"Password!1\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:4111/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4111",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create account",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Authorization",
+            "value": "Basic U2FzaGE6UGFzc3dvcmQhMg==",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4111/api/v1/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4111",
+          "path": [
+            "api",
+            "v1",
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Customer accounts",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "*/*"
+          },
+          {
+            "key": "Authorization",
+            "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4111/api/v1/customer/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "4111",
+          "path": [
+            "api",
+            "v1",
+            "customer",
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
