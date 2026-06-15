@@ -77,7 +77,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"id\": 1,\n  \"balance\": 1\n}",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 0.01\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -172,6 +172,50 @@
                     "accounts",
                     "1",
                     "transactions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "deposit amount below maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 4999.99\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/deposit",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "deposit"
                   ]
                 }
               },
@@ -290,7 +334,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"id\": 1,\n  \"balance\": 5001\n}",
+                  "raw": "{\n  \"id\": 1,\n  \"balance\": 5000.01\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -784,7 +828,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 1\n}",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 0.01\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -879,6 +923,50 @@
                     "accounts",
                     "1",
                     "transactions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "transfer amount below maximum allowed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic TWF4aW06UGFzc3dvcmQhMQ=="
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 9999.99\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:4111/api/v1/accounts/transfer",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "4111",
+                  "path": [
+                    "api",
+                    "v1",
+                    "accounts",
+                    "transfer"
                   ]
                 }
               },
@@ -997,7 +1085,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 10001\n}",
+                  "raw": "{\n  \"senderAccountId\": 1,\n  \"receiverAccountId\": 2,\n  \"amount\": 10000.01\n}",
                   "options": {
                     "raw": {
                       "language": "json"
