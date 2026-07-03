@@ -178,6 +178,12 @@ public class TransferTests {
         // Создаем аккаунт пользователя 2
         int receiverAccountId = createUserAccount(user2Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderInitialBalance = 15000f;
+        float receiverInitialBalance = 0f;
+        float senderExpectedBalance = senderInitialBalance - amount;
+        float receiverExpectedBalance = receiverInitialBalance + amount;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -185,6 +191,7 @@ public class TransferTests {
                             "amount": %s
                         }
                 """, senderAccountId, receiverAccountId, amount);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -198,6 +205,28 @@ public class TransferTests {
                 .body("receiverAccountId", Matchers.equalTo(receiverAccountId))
                 .body("senderAccountId", Matchers.equalTo(senderAccountId))
                 .body("message", Matchers.equalTo("Transfer successful"));
+
+        // проверка измененного баланса у отправителя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance));
+
+        // проверка измененного баланса у получателя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user2Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // позитивный тест на трансфер между своими аккаунтами
@@ -221,6 +250,12 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderInitialBalance = 5000f;
+        float receiverInitialBalance = 0f;
+        float senderExpectedBalance = senderInitialBalance - 100f;
+        float receiverExpectedBalance = receiverInitialBalance + 100f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -241,6 +276,18 @@ public class TransferTests {
                 .body("receiverAccountId", Matchers.equalTo(receiverAccountId))
                 .body("senderAccountId", Matchers.equalTo(senderAccountId))
                 .body("message", Matchers.equalTo("Transfer successful"));
+
+        // проверка измененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест c невалидной суммой трансфера
@@ -277,6 +324,10 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -284,6 +335,7 @@ public class TransferTests {
                             "amount": %s
                         }
                 """, senderAccountId, receiverAccountId, amount);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -294,6 +346,18 @@ public class TransferTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.equalTo(errorValue));
+
+        // проверка неизмененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: трансфер на несуществующий аккаунт
@@ -318,6 +382,9 @@ public class TransferTests {
         // что мы выйдем за пределы int)
         int nonExistingAccId = senderAccountId + 1000000;
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -335,6 +402,17 @@ public class TransferTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.equalTo("Invalid transfer: insufficient funds or invalid accounts"));
+
+        // проверка неизмененного баланса отправителя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance));
     }
 
     // негативный тест: трансфер с несуществующего аккаунта
@@ -359,6 +437,9 @@ public class TransferTests {
         // что мы выйдем за пределы int)
         int nonExistingAccId = receiverAccountId + 1000000;
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float receiverExpectedBalance = 5000f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -366,6 +447,7 @@ public class TransferTests {
                             "amount": %s
                         }
                 """, nonExistingAccId, receiverAccountId, 100f);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -376,11 +458,22 @@ public class TransferTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .body(Matchers.equalTo("Unauthorized access to account"));
+
+        // проверка неизмененного баланса получателя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: трансфер с чужого аккаунта
     @Test
-    public void userCannotTransferFromAnotherUserAccount(){
+    public void userCannotTransferFromAnotherUserAccount() {
         // Создаем имя пользователя 1
         String username1 = getUsername("u1");
 
@@ -392,6 +485,9 @@ public class TransferTests {
 
         // Создаем аккаунт пользователя
         int senderAccountId = createUserAccount(user1Token);
+
+        // Делаем депозит на 5 тысяч
+        depositMoneyOnAccount(senderAccountId, user1Token);
 
         // Создаем имя пользователя 2
         String username2 = getUsername("u2");
@@ -405,6 +501,10 @@ public class TransferTests {
         // Создаем аккаунт пользователя 2
         int receiverAccountId = createUserAccount(user2Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -412,6 +512,7 @@ public class TransferTests {
                             "amount": %s
                         }
                 """, senderAccountId, receiverAccountId, 100f);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -422,6 +523,28 @@ public class TransferTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .body(Matchers.equalTo("Unauthorized access to account"));
+
+        // проверка неизмененного баланса у отправителя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance));
+
+        // проверка неизмененного баланса у получателя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user2Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: без senderAccountId в body
@@ -441,6 +564,9 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для получателя
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "receiverAccountId": %s,
@@ -459,6 +585,17 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса получателя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: без receiverAccountId в body
@@ -481,6 +618,9 @@ public class TransferTests {
 
         // Receiver account не создаем, потому что проверяем отсутствие receiverAccountId в body
 
+        // подготовка ожидаемого баланса для отправителя
+        float senderExpectedBalance = 5000f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -499,6 +639,18 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса у отправителя
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance));
+
     }
 
     // негативный тест: без amount в body
@@ -522,6 +674,10 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -540,6 +696,18 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: c string senderAccountId в body
@@ -558,6 +726,9 @@ public class TransferTests {
 
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
+
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float receiverExpectedBalance = 0f;
 
         String requestBody = String.format("""
                 {
@@ -578,6 +749,17 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса в аккаунте получателе
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: c string receiverAccountId в body
@@ -600,6 +782,9 @@ public class TransferTests {
 
         // Receiver account не создаем, потому что проверяем receiverAccountId = string в body
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -619,6 +804,17 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса в аккаунте отправителе
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance));
     }
 
     // негативный тест: c string amount в body
@@ -642,6 +838,10 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -661,6 +861,18 @@ public class TransferTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/transfer"));
+
+        // проверка неизмененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: трансфер без токена авторизации
@@ -684,6 +896,10 @@ public class TransferTests {
         // Создаем второй аккаунт пользователя 1
         int receiverAccountId = createUserAccount(user1Token);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -699,6 +915,18 @@ public class TransferTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверка неизмененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 
     // негативный тест: трансфер с битым токеном авторизации
@@ -724,6 +952,10 @@ public class TransferTests {
 
         String brokenToken = user1Token.substring(0,user1Token.length()-5);
 
+        // подготовка ожидаемого баланса для отправителя и получателя
+        float senderExpectedBalance = 5000f;
+        float receiverExpectedBalance = 0f;
+
         String requestBody = String.format("""
                 {
                             "senderAccountId": %s,
@@ -740,5 +972,18 @@ public class TransferTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверка неизмененного баланса в обоих аккаунтах
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", user1Token)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + senderAccountId + " }.balance", Matchers.comparesEqualTo(senderExpectedBalance))
+                .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 }
+
