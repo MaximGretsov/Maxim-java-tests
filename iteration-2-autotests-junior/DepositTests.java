@@ -1,12 +1,9 @@
 package iteration2;
 
 import io.restassured.RestAssured;
-import io.restassured.config.JsonConfig;
-import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.config.JsonPathConfig;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -150,6 +146,7 @@ public class DepositTests {
                         "balance": %s
                     }
                 """, accId, balance);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -163,13 +160,24 @@ public class DepositTests {
                 .body("accountNumber", Matchers.equalTo("ACC" + accId))
                 .body("balance", Matchers.comparesEqualTo(newBalance))
                 .body("transactions", Matchers.notNullValue());
+
+        // проверяем обновленный депозит
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(newBalance));
     }
 
     // негативные тесты c невалидной суммой депозита
     public static Stream<Arguments> InvalidAmount(){
         return Stream.of(
                 // отправка 0
-                Arguments.of(0, "Deposit amount must be at least 0.01"),
+                Arguments.of(0f, "Deposit amount must be at least 0.01"),
                 // отправка отрицательного числа
                 Arguments.of(-1f, "Deposit amount must be at least 0.01"),
                 //  отправка больше максимума
@@ -179,7 +187,7 @@ public class DepositTests {
 
     @MethodSource("InvalidAmount")
     @ParameterizedTest
-    public void userCannotDepositWithInvalidAmount(float  balance,String errorValue){
+    public void userCannotDepositWithInvalidAmount(float  balance, String errorValue){
         // Создаем имя юзера
         String username = getUsername();
 
@@ -198,6 +206,7 @@ public class DepositTests {
                             "balance": %s
                         }
                 """, accId, balance);
+
         given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
@@ -209,6 +218,17 @@ public class DepositTests {
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.equalTo(errorValue));
 
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест c депозитом на несуществующий аккаунт
@@ -247,13 +267,25 @@ public class DepositTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .body(Matchers.equalTo("Unauthorized access to account"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест c депозитом на чужой аккаунт
     @Test
     public void userCannotDepositToAnotherUserAccount(){
         // Создаем имя пользователя1
-        String username1 = getUsername();
+        String username1 = "u1" + getUsername();
 
         // Создаем пользователя1
         createUser(username1);
@@ -265,16 +297,13 @@ public class DepositTests {
         int accId1 = createUserAccount(userToken1);
 
         // Создаем имя пользователя2
-        String username2 = getUsername();
+        String username2 = "u2" + getUsername();
 
         // Создаем пользователя2
         createUser(username2);
 
         // Получаем токен пользователя2
         String userToken2 = getUserToken(username2);
-
-        // Создаем аккаунт пользователя2
-        int accId2 = createUserAccount(userToken2);
 
         String requestBody = String.format("""
                 {
@@ -293,9 +322,21 @@ public class DepositTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .body(Matchers.equalTo("Unauthorized access to account"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken1)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId1 + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId1 + " }.transactions.size()", Matchers.equalTo(0));
     }
 
-    // негативный тест c string id в body (для этого теста создавать аккаунт внутри не надо)
+    // негативный тест c string id в body
     @Test
     public void userCannotDepositWithStringIdInBody(){
         // Создаем имя юзера
@@ -306,6 +347,9 @@ public class DepositTests {
 
         // Получаем его токен
         String userToken = getUserToken(username);
+
+        // Создаем аккаунт пользователя1
+        int accId = createUserAccount(userToken);
 
         String requestBody = String.format("""
                 {
@@ -326,6 +370,18 @@ public class DepositTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/deposit"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест c string balance в body
@@ -362,6 +418,18 @@ public class DepositTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/deposit"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест без id в body (для этого теста создавать аккаунт внутри не надо)
@@ -376,6 +444,8 @@ public class DepositTests {
         // Получаем его токен
         String userToken = getUserToken(username);
 
+        // Создаем аккаунт пользователя
+        int accId = createUserAccount(userToken);
 
         String requestBody = String.format("""
                 {
@@ -395,6 +465,18 @@ public class DepositTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/deposit"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест без balance в body
@@ -430,6 +512,18 @@ public class DepositTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/accounts/deposit"));
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест с невалидным токеном авторизации
@@ -465,6 +559,18 @@ public class DepositTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 
     // негативный тест без токена авторизации(нет хедера с авторизацией)
@@ -497,6 +603,17 @@ public class DepositTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверяем что депозит не изменился и записей о транзакциях не прибавилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/accounts")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("find { it.id == " + accId + " }.balance", Matchers.comparesEqualTo(0f))
+                .body("find { it.id == " + accId + " }.transactions.size()", Matchers.equalTo(0));
     }
 }
-
