@@ -986,4 +986,3 @@ public class TransferTests {
                 .body("find { it.id == " + receiverAccountId + " }.balance", Matchers.comparesEqualTo(receiverExpectedBalance));
     }
 }
-
