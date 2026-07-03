@@ -122,6 +122,17 @@ public class ChangeNameInProfileTests {
                 .statusCode(HttpStatus.SC_OK)
                 .body("customer.name", Matchers.equalTo("New Name"))
                 .body("message", Matchers.equalTo("Profile updated successfully"));
+
+        // проверка, что имя изменилось
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.equalTo("New Name"));
     }
 
     // негативные тесты
@@ -179,6 +190,17 @@ public class ChangeNameInProfileTests {
                 .assertThat()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.equalTo("Name must contain two words with letters only"));
+
+        // проверка что имя не изменилось и осталось изначальным(null)
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.nullValue());
     }
 
 
@@ -210,6 +232,17 @@ public class ChangeNameInProfileTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/customer/profile"));
+
+        // проверка что имя не изменилось и осталось изначальным(null)
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.nullValue());
     }
 
     // негативный тест: отправка запроса без поля name в body
@@ -238,6 +271,17 @@ public class ChangeNameInProfileTests {
                 .body("status", Matchers.equalTo(500))
                 .body("error", Matchers.equalTo("Internal Server Error"))
                 .body("path", Matchers.equalTo("/api/v1/customer/profile"));
+
+        // проверка что имя не изменилось и осталось изначальным(null)
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.nullValue());
     }
 
     // негативный тест с невалидным токеном авторизации
@@ -267,6 +311,17 @@ public class ChangeNameInProfileTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверка что имя не изменилось и осталось изначальным(null)
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.nullValue());
     }
 
     // негативный тест без токена авторизации(нет хедера с авторизацией)
@@ -277,6 +332,9 @@ public class ChangeNameInProfileTests {
 
         // Создаем юзера
         createUser(username);
+
+        // Получаем его токен
+        String userToken = getUserToken(username);
 
         given()
                 .contentType(ContentType.JSON)
@@ -290,5 +348,17 @@ public class ChangeNameInProfileTests {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+
+        // проверка что имя не изменилось и осталось изначальным(null)
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Authorization", userToken)
+                .get("http://localhost:4111/api/v1/customer/profile")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", Matchers.nullValue());
     }
 }
+
