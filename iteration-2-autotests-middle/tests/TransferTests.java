@@ -1,4 +1,4 @@
-package iteration2;
+package tests;
 
 import generators.RandomData;
 import io.restassured.specification.RequestSpecification;
