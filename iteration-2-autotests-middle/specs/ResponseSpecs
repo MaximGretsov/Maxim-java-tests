@@ -1,0 +1,101 @@
+package specs;
+
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.specification.ResponseSpecification;
+import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
+
+public class ResponseSpecs {
+    private ResponseSpecs(){};
+
+    private static ResponseSpecBuilder defaultResponseBuilder(){
+        return new ResponseSpecBuilder();
+    }
+
+    // 201
+    public static ResponseSpecification entityWasCreated(){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_CREATED)
+                .build();
+    }
+
+    // 200
+    public static ResponseSpecification requestReturnsOk(){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_OK)
+                .build();
+    }
+
+    // успешный депозит
+    public static ResponseSpecification successfulDepositResponse(int accountId, float expectedBalance){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_OK)
+                .expectBody("id", Matchers.equalTo(accountId))
+                .expectBody("accountNumber", Matchers.equalTo("ACC" + accountId))
+                .expectBody("balance", Matchers.comparesEqualTo(expectedBalance))
+                .expectBody("transactions", Matchers.notNullValue())
+                .build();
+    }
+
+    // успешный трансфер
+    public static ResponseSpecification successfulTransferResponse(float expectedAmount,
+                                                                   int senderAccountId, int receiverAccountId) {
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_OK)
+                .expectBody("amount", Matchers.equalTo(expectedAmount))
+                .expectBody("receiverAccountId", Matchers.equalTo(receiverAccountId))
+                .expectBody("senderAccountId", Matchers.equalTo(senderAccountId))
+                .expectBody("message", Matchers.equalTo("Transfer successful"))
+                .build();
+    }
+
+    // успешное изменение профиля
+    public static ResponseSpecification successfulProfileUpdateResponse(String expectedName) {
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_OK)
+                .expectBody("message", Matchers.equalTo("Profile updated successfully"))
+                .expectBody("customer.name", Matchers.equalTo(expectedName))
+                .build();
+    }
+
+    // 400 для ошибок с ключом
+    public static ResponseSpecification requestReturnsBadRequest(String errorKey, String errorValue){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
+                .expectBody(errorKey, Matchers.hasItem(errorValue))
+                .build();
+    }
+
+    // 400 для ошибок без ключа
+    public static ResponseSpecification requestReturnsBadRequestWithText(String errorText){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
+                .expectBody(Matchers.equalTo(errorText))
+                .build();
+    }
+
+    // 403
+    public static ResponseSpecification forbiddenWithText(String errorText){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_FORBIDDEN)
+                .expectBody(Matchers.equalTo(errorText))
+                .build();
+    }
+
+    // 401
+    public static ResponseSpecification unauthorized(){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_UNAUTHORIZED)
+                .build();
+    }
+
+    // 500 (ответ приходит объектом)
+    public static ResponseSpecification internalServerErrorForPath(String path){
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .expectBody("status", Matchers.equalTo(500))
+                .expectBody("error", Matchers.equalTo("Internal Server Error"))
+                .expectBody("path", Matchers.equalTo(path))
+                .build();
+    }
+}
