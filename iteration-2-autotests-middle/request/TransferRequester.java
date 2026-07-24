@@ -23,14 +23,4 @@ public class TransferRequester extends PostRequester<BaseModel> {
                 .spec(responseSpecification);
     }
 
-    // Для невалидного body:
-    public ValidatableResponse postRawBody(String rawBody) {
-        return given()
-                .spec(requestSpecification)
-                .body(rawBody)
-                .post("/api/v1/accounts/transfer")
-                .then()
-                .assertThat()
-                .spec(responseSpecification);
-    }
 }

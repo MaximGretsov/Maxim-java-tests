@@ -22,15 +22,4 @@ public class DepositRequester extends PostRequester<BaseModel> {
                 .assertThat()
                 .spec(responseSpecification);
     }
-
-    // Отдельный метод для невалидного body
-    public ValidatableResponse postRawBody(String rawBody){
-        return given()
-                .spec(requestSpecification)
-                .body(rawBody)
-                .post("/api/v1/accounts/deposit")
-                .then()
-                .assertThat()
-                .spec(responseSpecification);
-    }
 }

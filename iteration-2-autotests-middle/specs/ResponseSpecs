@@ -6,7 +6,19 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 
 public class ResponseSpecs {
-    private ResponseSpecs(){};
+    private ResponseSpecs(){}
+
+    private static final String DEPOSIT_AMOUNT_LESS_THAN_MIN = "Deposit amount must be at least 0.01";
+    private static final String DEPOSIT_AMOUNT_MORE_THAN_MAX = "Deposit amount cannot exceed 5000";
+    private static final String UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account";
+    private static final int INTERNAL_SERVER_ERROR_STATUS = 500;
+    private static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
+    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Transfer amount must be at least 0.01";
+    private static final String TRANSFER_AMOUNT_MORE_THAN_MAX = "Transfer amount cannot exceed 10000";
+    private static final String INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts";
+    private static final String PROFILE_NAME_VALIDATION_MESSAGE = "Name must contain two words with letters only";
+    public static final String TRANSFER_SUCCESS_MESSAGE = "Transfer successful";
+    public static final String PROFILE_UPDATE_SUCCESS_MESSAGE = "Profile updated successfully";
 
     private static ResponseSpecBuilder defaultResponseBuilder(){
         return new ResponseSpecBuilder();
@@ -45,7 +57,7 @@ public class ResponseSpecs {
                 .expectBody("amount", Matchers.equalTo(expectedAmount))
                 .expectBody("receiverAccountId", Matchers.equalTo(receiverAccountId))
                 .expectBody("senderAccountId", Matchers.equalTo(senderAccountId))
-                .expectBody("message", Matchers.equalTo("Transfer successful"))
+                .expectBody("message", Matchers.equalTo(TRANSFER_SUCCESS_MESSAGE))
                 .build();
     }
 
@@ -53,7 +65,7 @@ public class ResponseSpecs {
     public static ResponseSpecification successfulProfileUpdateResponse(String expectedName) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
-                .expectBody("message", Matchers.equalTo("Profile updated successfully"))
+                .expectBody("message", Matchers.equalTo(PROFILE_UPDATE_SUCCESS_MESSAGE))
                 .expectBody("customer.name", Matchers.equalTo(expectedName))
                 .build();
     }
@@ -67,7 +79,7 @@ public class ResponseSpecs {
     }
 
     // 400 для ошибок без ключа
-    public static ResponseSpecification requestReturnsBadRequestWithText(String errorText){
+    private static ResponseSpecification requestReturnsBadRequestWithText(String errorText){
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
                 .expectBody(Matchers.equalTo(errorText))
@@ -93,9 +105,58 @@ public class ResponseSpecs {
     public static ResponseSpecification internalServerErrorForPath(String path){
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                .expectBody("status", Matchers.equalTo(500))
-                .expectBody("error", Matchers.equalTo("Internal Server Error"))
+                .expectBody("status", Matchers.equalTo(INTERNAL_SERVER_ERROR_STATUS))
+                .expectBody("error", Matchers.equalTo(INTERNAL_SERVER_ERROR_TEXT))
                 .expectBody("path", Matchers.equalTo(path))
                 .build();
+    }
+
+    // 400 при попытке отправить депозит меньше минимума
+    public static ResponseSpecification depositAmountLessThanMin() {
+        return requestReturnsBadRequestWithText(
+                DEPOSIT_AMOUNT_LESS_THAN_MIN
+        );
+    }
+
+    // 400 при попытке отправить депозит больше максимума
+    public static ResponseSpecification depositAmountMoreThanMax() {
+        return requestReturnsBadRequestWithText(
+                DEPOSIT_AMOUNT_MORE_THAN_MAX
+        );
+    }
+
+    // 400 при попытке отправить трансфер меньше минимума
+    public static ResponseSpecification transferAmountLessThanMin() {
+        return requestReturnsBadRequestWithText(
+                TRANSFER_AMOUNT_LESS_THAN_MIN
+        );
+    }
+
+    // 400 при попытке отправить трансфер больше максимума
+    public static ResponseSpecification transferAmountMoreThanMax() {
+        return requestReturnsBadRequestWithText(
+                TRANSFER_AMOUNT_MORE_THAN_MAX
+        );
+    }
+
+    // 400 при некорректном трансфере
+    public static ResponseSpecification invalidTransfer() {
+        return requestReturnsBadRequestWithText(
+                INVALID_TRANSFER
+        );
+    }
+
+    // 400 при некорректном имени
+    public static ResponseSpecification profileNameValidationError() {
+        return requestReturnsBadRequestWithText(
+                PROFILE_NAME_VALIDATION_MESSAGE
+        );
+    }
+
+    // 403 ошибка при неавторизованном аккаунте
+    public static ResponseSpecification unauthorizedAccessToAccount() {
+        return forbiddenWithText(
+                UNAUTHORIZED_ACCESS_TO_ACCOUNT
+        );
     }
 }
