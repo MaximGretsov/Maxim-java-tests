@@ -1,0 +1,149 @@
+package generators;
+
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.util.Random;
+
+
+public class RandomData {
+    private static final Random RANDOM = new Random();
+    private RandomData(){};
+
+    public static String getUsername(){
+        return RandomStringUtils.randomAlphabetic(10);
+    }
+
+    public static String getPassword(){
+        return RandomStringUtils.randomAlphabetic(3).toUpperCase() +
+                RandomStringUtils.randomAlphabetic(5).toLowerCase() +
+                RandomStringUtils.randomNumeric(3) + "$";
+    }
+
+    // Метод для создания имени в профиле
+    public static String generateValidProfileName() {
+        return generateRandomLettersWord() + " " + generateRandomLettersWord();
+    }
+
+    // Метод для генерации слова в имени в профиля
+    private static String generateRandomLettersWord() {
+        int wordLength = RANDOM.nextInt(3, 5);
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        StringBuilder word = new StringBuilder();
+
+        for (int i = 0; i < wordLength; i++) {
+            int randomIndex = RANDOM.nextInt(letters.length());
+            word.append(letters.charAt(randomIndex));
+        }
+
+        return word.toString();
+    }
+
+    public static String generateSingleWordProfileName() {
+        return generateRandomLettersWord();
+    }
+
+    public static String generateThreeWordProfileName() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord();
+    }
+
+    public static String generateProfileNameWithLeadingSpace() {
+        return " " + generateValidProfileName();
+    }
+
+    public static String generateProfileNameWithTrailingSpace() {
+        return generateValidProfileName() + " ";
+    }
+
+    public static String generateProfileNameWithDoubleSpace() {
+        return generateRandomLettersWord()
+                + "  "
+                + generateRandomLettersWord();
+    }
+
+    public static String generateProfileNameWithSpecialCharacter() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "%";
+    }
+
+    public static String generateProfileNameWithDigit() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "1";
+    }
+
+    public static String generateProfileNameWithHyphen() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "-"
+                + generateRandomLettersWord();
+    }
+
+    public static String generateOnlySpacesProfileName() {
+        int spacesCount = RANDOM.nextInt(2, 11);
+
+        return " ".repeat(spacesCount);
+    }
+
+    public static float generateValidTransferAmount() {
+        int amountInCents = RANDOM.nextInt(2, 1_000_000);
+
+        return amountInCents / 100f;
+    }
+
+    public static float generateNegativeTransferAmount() {
+        int amountInCents = RANDOM.nextInt(1, 1_000_001);
+
+        return -(amountInCents / 100f);
+    }
+
+    public static float generateTransferAmountMoreThanMax() {
+        int amountInCents = RANDOM.nextInt(1_000_002, 2_000_001);
+
+        return amountInCents / 100f;
+    }
+
+    public static float generateTransferAmountMoreThanBalance(float currentBalance) {
+        if (currentBalance >= 10_000f) {
+            throw new IllegalArgumentException(
+                    "Current balance must be less than max transfer amount"
+            );
+        }
+
+        int currentBalanceInCents = Math.round(currentBalance * 100);
+        int amountInCents = RANDOM.nextInt(currentBalanceInCents + 1, 1_000_001);
+
+        return amountInCents / 100f;
+    }
+
+    public static float generateValidDepositAmount() {
+        int amountInCents = RANDOM.nextInt(2, 500000);
+
+        return amountInCents / 100f;
+    }
+
+    public static float generateNegativeDepositAmount() {
+        int amountInCents = RANDOM.nextInt(1, 500001);
+
+        return -(amountInCents / 100f);
+    }
+
+    public static float generateDepositAmountMoreThanMax() {
+        int amountInCents = RANDOM.nextInt(500002, 1000001);
+
+        return amountInCents / 100f;
+    }
+
+    public static int generateNonExistingAccountIdBasedOn(int existingAccountId) {
+        int offset = RANDOM.nextInt(100_000, 1_000_000);
+
+        return existingAccountId + offset;
+    }
+}
