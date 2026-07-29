@@ -8,18 +8,10 @@ import api.models.CreateUserResponse;
 import api.models.comparison.ModelAssertions;
 import iteration2.ui.BaseUITest;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
-import api.specs.RequestSpecs;
 import ui.pages.AdminPanel;
 import ui.pages.BankAlert;
 
-import java.util.Arrays;
-
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.switchTo;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreateUserTest extends BaseUITest {
     @Test
@@ -32,10 +24,13 @@ public class CreateUserTest extends BaseUITest {
         // Шаг 2: админ создает юзера в банке
         CreateUserRequest newUser = RandomModelGenerator.generate(CreateUserRequest.class);
 
-        new AdminPanel().open().createUser(newUser.getUsername(),newUser.getPassword())
-                .checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY.getMessage())
-                .getAllUsers().findBy(Condition.exactText(newUser.getUsername() + "\nUSER"))
-                .shouldBe(Condition.visible);
+        new AdminPanel()
+                .open()
+                .createUser(newUser.getUsername(), newUser.getPassword())
+                .checkAlertMessageAndAccept(
+                        BankAlert.USER_CREATED_SUCCESSFULLY.getMessage()
+                )
+                .shouldHaveUser(newUser.getUsername());
 
         // Шаг 3: Проверка, что юзер создан на API
         CreateUserResponse createdUser = AdminSteps.getAllUsers().stream()
