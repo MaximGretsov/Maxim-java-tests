@@ -11,6 +11,7 @@ import static com.codeborne.selenide.Selenide.$;
 public class AdminPanel extends BasePage<AdminPanel>{
     private SelenideElement adminPanelText =  $(Selectors.byText("Admin Panel"));
     private SelenideElement addUserButton = $(Selectors.byText("Add User"));
+    private static final String USER_BADGE_TEXT_TEMPLATE = "%s\nUSER";
 
     @Override
     public String url() {
@@ -21,6 +22,16 @@ public class AdminPanel extends BasePage<AdminPanel>{
         usernameInput.sendKeys(username);
         passwordInput.sendKeys(password);
         addUserButton.click();
+        return this;
+    }
+
+    public AdminPanel shouldHaveUser(String username) {
+        getAllUsers()
+                .findBy(Condition.exactText(
+                        USER_BADGE_TEXT_TEMPLATE.formatted(username)
+                ))
+                .shouldBe(Condition.visible);
+
         return this;
     }
 
