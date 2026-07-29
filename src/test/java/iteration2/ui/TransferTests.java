@@ -211,7 +211,7 @@ public class TransferTests extends BaseUITest {
                 .openTransferPage()
                 .openTransferAgain()
                 .searchTransactions(user.getUsername())
-                .openRepeatTransferFor("TRANSFER_IN")
+                .openIncomingTransferForRepeat()
                 .selectRepeatSenderAccount(senderAccountId)
                 .enterRepeatTransferAmount(repeatTransferAmount)
                 .confirmRepeatTransferDetails()
@@ -302,7 +302,7 @@ public class TransferTests extends BaseUITest {
                 .openTransferPage()
                 .openTransferAgain()
                 .searchTransactions(user.getUsername())
-                .openRepeatTransferFor("TRANSFER_IN")
+                .openIncomingTransferForRepeat()
                 .selectRepeatSenderAccount(senderAccountId)
                 .enterRepeatTransferAmount(
                         invalidRepeatTransferAmount
