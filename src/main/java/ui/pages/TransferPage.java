@@ -10,6 +10,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 public class TransferPage extends BasePage<TransferPage> {
+    private static final String INCOMING_TRANSFER_TYPE = "TRANSFER_IN";
 
     private final SelenideElement accountSelector =
             $(".account-selector");
@@ -232,5 +233,9 @@ public class TransferPage extends BasePage<TransferPage> {
         repeatButtons.shouldHave(size(0));
 
         return this;
+    }
+
+    public TransferPage openIncomingTransferForRepeat() {
+        return openRepeatTransferFor(INCOMING_TRANSFER_TYPE);
     }
 }

@@ -7,6 +7,8 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import api.requests.skeleton.Endpoint;
 
+import java.util.List;
+
 public class ResponseSpecs {
     private ResponseSpecs(){};
 
@@ -77,10 +79,10 @@ public class ResponseSpecs {
     }
 
     // 400 для ошибок с ключом
-    public static ResponseSpecification requestReturnsBadRequest(String errorKey, String errorValue){
+    public static ResponseSpecification requestReturnsBadRequest(String errorKey, List<String> errorValues){
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
-                .expectBody(errorKey, Matchers.hasItem(errorValue))
+                .expectBody(errorKey,Matchers.containsInAnyOrder(errorValues.toArray()))
                 .build();
     }
 

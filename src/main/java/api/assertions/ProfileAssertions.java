@@ -1,5 +1,6 @@
 package api.assertions;
 
+import api.requests.steps.UserSteps;
 import io.restassured.specification.RequestSpecification;
 import api.models.CustomerProfileResponse;
 import api.models.ProfileUpdateRequest;
@@ -19,9 +20,30 @@ public class ProfileAssertions {
             RequestSpecification userSpec,
             String expectedName
     ) {
-        CustomerProfileResponse profile =
-                ProfileSteps.getProfile(userSpec);
+        assertProfileName(
+                softy,
+                ProfileSteps.getProfile(userSpec),
+                expectedName
+        );
+    }
 
+    public static void assertProfileName(
+            SoftAssertions softy,
+            UserSteps userSteps,
+            String expectedName
+    ) {
+        assertProfileName(
+                softy,
+                userSteps.getProfile(),
+                expectedName
+        );
+    }
+
+    private static void assertProfileName(
+            SoftAssertions softy,
+            CustomerProfileResponse profile,
+            String expectedName
+    ) {
         softy.assertThat(profile.getName())
                 .as("Имя пользователя в профиле")
                 .isEqualTo(expectedName);

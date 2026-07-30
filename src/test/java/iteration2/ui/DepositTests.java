@@ -1,14 +1,14 @@
 package iteration2.ui;
 
 import api.models.*;
-import api.requests.steps.AccountSteps;
+import api.requests.steps.UserSteps;
 import com.codeborne.selenide.*;
 import api.generators.RandomModelGenerator;
-import io.restassured.specification.RequestSpecification;
+import common.annotations.UserSession;
 import org.junit.jupiter.api.Test;
-import api.specs.RequestSpecs;
 import ui.pages.BankAlert;
 import ui.pages.UserDashboard;
+import common.storage.SessionStorage;
 
 import static api.assertions.AccountAssertions.assertAccountAfterSuccessfulDeposit;
 import static api.assertions.AccountAssertions.assertAccountIsEmpty;
@@ -16,21 +16,20 @@ import static api.factories.DepositRequestFactory.depositRequestWithAmount;
 
 public class DepositTests extends BaseUITest{
     @Test
-    public void userCanDepositMoneyWithCorrectDataTest(){
-        CreateUserRequest user = createUserForTest();
+    @UserSession
+    public void userCanDepositMoneyWithCorrectDataTest() {
+        UserSteps userSteps = SessionStorage.getSteps();
 
-        RequestSpecification userSpec = RequestSpecs.authAsUserSpec(
-                user.getUsername(),
-                user.getPassword()
+        int accountId = userSteps.createAccount();
+
+        assertAccountIsEmpty(
+                softy,
+                userSteps,
+                accountId
         );
 
-        int accountId = AccountSteps.createAccount(userSpec);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-
-        float depositAmount = RandomModelGenerator.generateValidDepositAmount();
-
-        authAsUser(user);
+        float depositAmount =
+                RandomModelGenerator.generateValidDepositAmount();
 
         new UserDashboard()
                 .open()
@@ -38,32 +37,41 @@ public class DepositTests extends BaseUITest{
                 .selectAccount(accountId)
                 .enterAmount(depositAmount)
                 .submitDeposit()
-                .checkAlertMessageAndAccept(BankAlert.GOOD_DEPOSIT.format(depositAmount,accountId));
+                .checkAlertMessageAndAccept(
+                        BankAlert.GOOD_DEPOSIT.format(
+                                depositAmount,
+                                accountId
+                        )
+                );
 
-        DepositRequest expectedDeposit = depositRequestWithAmount(accountId, depositAmount);
+        DepositRequest expectedDeposit =
+                depositRequestWithAmount(
+                        accountId,
+                        depositAmount
+                );
 
-        assertAccountAfterSuccessfulDeposit(softy, userSpec, expectedDeposit);
+        assertAccountAfterSuccessfulDeposit(
+                softy,
+                userSteps,
+                expectedDeposit
+        );
     }
 
     @Test
-    public void userCannotDepositMoneyWithIncorrectDataTest(){
-        CreateUserRequest user = createUserForTest();
+    @UserSession
+    public void userCannotDepositMoneyWithIncorrectDataTest() {
+        UserSteps userSteps = SessionStorage.getSteps();
 
-        RequestSpecification userSpec = RequestSpecs.authAsUserSpec(
-                user.getUsername(),
-                user.getPassword()
-        );
-
-        int accountId = AccountSteps.createAccount(userSpec);
+        int accountId = userSteps.createAccount();
 
         assertAccountIsEmpty(
                 softy,
-                userSpec,
+                userSteps,
                 accountId
         );
-        float incorrectDepositAmount = RandomModelGenerator.generateNegativeDepositAmount();
 
-        authAsUser(user);
+        float incorrectDepositAmount =
+                RandomModelGenerator.generateNegativeDepositAmount();
 
         new UserDashboard()
                 .open()
@@ -71,8 +79,14 @@ public class DepositTests extends BaseUITest{
                 .selectAccount(accountId)
                 .enterAmount(incorrectDepositAmount)
                 .submitDeposit()
-                .checkAlertMessageAndAccept(BankAlert.BAD_DEPOSIT.getMessage());
+                .checkAlertMessageAndAccept(
+                        BankAlert.BAD_DEPOSIT.getMessage()
+                );
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        assertAccountIsEmpty(
+                softy,
+                userSteps,
+                accountId
+        );
     }
 }

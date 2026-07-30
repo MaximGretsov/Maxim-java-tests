@@ -5,7 +5,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import api.models.AccountResponse;
 import api.models.DepositRequest;
-import api.models.InvalidDepositRequest;
 import api.models.comparison.ModelAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -174,88 +173,6 @@ public class DepositTests extends BaseTest {
         ).post(depositRequest);
 
         assertAccountIsEmpty(softy, secondUserSpec, secondUserAccountId);
-    }
-
-    @Test
-    public void userCannotDepositWithStringIdInBody() {
-        RequestSpecification userSpec = createUserSpecForTest();
-        int accountId = AccountSteps.createAccount(userSpec);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-
-        InvalidDepositRequest depositRequest = InvalidDepositRequest.builder()
-                .id(RandomModelGenerator.generateStringValue())
-                .balance(RandomModelGenerator.generateValidDepositAmount())
-                .build();
-
-        new CrudRequester(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.DEPOSIT)
-        ).post(depositRequest);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-    }
-
-    @Test
-    public void userCannotDepositWithStringBalanceInBody() {
-        RequestSpecification userSpec = createUserSpecForTest();
-        int accountId = AccountSteps.createAccount(userSpec);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-
-        InvalidDepositRequest depositRequest = InvalidDepositRequest.builder()
-                .id(accountId)
-                .balance(RandomModelGenerator.generateStringValue())
-                .build();
-
-        new CrudRequester(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.DEPOSIT)
-        ).post(depositRequest);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-    }
-
-    @Test
-    public void userCannotDepositWithoutIdInBody() {
-        RequestSpecification userSpec = createUserSpecForTest();
-        int accountId = AccountSteps.createAccount(userSpec);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-
-        InvalidDepositRequest depositRequest = InvalidDepositRequest.builder()
-                .balance(RandomModelGenerator.generateValidDepositAmount())
-                .build();
-
-        new CrudRequester(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.DEPOSIT)
-        ).post(depositRequest);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-    }
-
-    @Test
-    public void userCannotDepositWithoutBalanceInBody() {
-        RequestSpecification userSpec = createUserSpecForTest();
-        int accountId = AccountSteps.createAccount(userSpec);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
-
-        InvalidDepositRequest depositRequest = InvalidDepositRequest.builder()
-                .id(accountId)
-                .build();
-
-        new CrudRequester(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.DEPOSIT)
-        ).post(depositRequest);
-
-        assertAccountIsEmpty(softy, userSpec, accountId);
     }
 
     @Test

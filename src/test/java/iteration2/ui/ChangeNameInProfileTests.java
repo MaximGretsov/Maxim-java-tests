@@ -1,10 +1,10 @@
 package iteration2.ui;
 
 import api.generators.RandomModelGenerator;
-import api.models.CreateUserRequest;
-import io.restassured.specification.RequestSpecification;
+import api.requests.steps.UserSteps;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import org.junit.jupiter.api.Test;
-import api.specs.RequestSpecs;
 import ui.pages.BankAlert;
 import ui.pages.UserDashboard;
 
@@ -13,52 +13,52 @@ import static api.testdata.ProfileTestData.*;
 
 public class ChangeNameInProfileTests extends BaseUITest{
     @Test
-    public void userCanUpdateProfileNameWithCorrectDataTest(){
-        CreateUserRequest user = createUserForTest();
+    @UserSession
+    public void userCanUpdateProfileNameWithCorrectDataTest() {
+        UserSteps userSteps = SessionStorage.getSteps();
 
-        RequestSpecification userSpec = RequestSpecs.authAsUserSpec(
-                user.getUsername(),
-                user.getPassword()
-        );
-
-        String correctNewName = RandomModelGenerator.generateValidProfileName();
-
-        authAsUser(user);
+        String correctNewName =
+                RandomModelGenerator.generateValidProfileName();
 
         new UserDashboard()
                 .open()
                 .openEditProfile()
                 .changeName(correctNewName)
-                .checkAlertMessageAndAccept(BankAlert.PROFILE_UPDATED_SUCCESSFULLY.getMessage())
+                .checkAlertMessageAndAccept(
+                        BankAlert.PROFILE_UPDATED_SUCCESSFULLY.getMessage()
+                )
                 .openUserDashboard()
                 .checkDisplayedName(correctNewName);
 
-        // Шаг 7: имя пользователя изменилось на API
-        assertProfileName(softy, userSpec, correctNewName);
+        assertProfileName(
+                softy,
+                userSteps,
+                correctNewName
+        );
     }
 
     @Test
-    public void userCannotUpdateProfileNameWithIncorrectDataTest(){
-        // Шаги по настройке окружения
-        CreateUserRequest user = createUserForTest();
+    @UserSession
+    public void userCannotUpdateProfileNameWithIncorrectDataTest() {
+        UserSteps userSteps = SessionStorage.getSteps();
 
-        RequestSpecification userSpec = RequestSpecs.authAsUserSpec(
-                user.getUsername(),
-                user.getPassword()
-        );
-
-        String incorrectNewName = RandomModelGenerator.generateStringValue();
-
-        authAsUser(user);
+        String incorrectNewName =
+                RandomModelGenerator.generateStringValue();
 
         new UserDashboard()
                 .open()
                 .openEditProfile()
                 .changeName(incorrectNewName)
-                .checkAlertMessageAndAccept(BankAlert.ENTER_VALID_NAME.getMessage())
+                .checkAlertMessageAndAccept(
+                        BankAlert.ENTER_VALID_NAME.getMessage()
+                )
                 .openUserDashboard()
                 .checkDisplayedName(DEFAULT_PROFILE_UI_NAME);
 
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
+        assertProfileName(
+                softy,
+                userSteps,
+                DEFAULT_PROFILE_API_NAME
+        );
     }
 }

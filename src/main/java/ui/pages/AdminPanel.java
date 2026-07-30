@@ -4,6 +4,10 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import common.utils.RetryUtils;
+import ui.elements.UserBage;
+
+import java.util.List;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -11,6 +15,7 @@ import static com.codeborne.selenide.Selenide.$;
 public class AdminPanel extends BasePage<AdminPanel>{
     private SelenideElement adminPanelText =  $(Selectors.byText("Admin Panel"));
     private SelenideElement addUserButton = $(Selectors.byText("Add User"));
+    private static final String USER_BADGE_TEXT_TEMPLATE = "%s\nUSER";
 
     @Override
     public String url() {
@@ -24,7 +29,17 @@ public class AdminPanel extends BasePage<AdminPanel>{
         return this;
     }
 
-    public ElementsCollection getAllUsers() {
-        return $(Selectors.byText("All Users")).parent().findAll("li");
+    public List<UserBage> getAllUsers() {
+        ElementsCollection elementsCollection =  $(Selectors.byText("All Users")).parent().findAll("li");
+        return generatePageElements(elementsCollection, UserBage::new);
+    }
+
+    public UserBage findUserByUsername(String username) {
+        return RetryUtils.retry(
+                () -> getAllUsers().stream().filter(it -> it.getUsername().equals(username)).findAny().orElse(null),
+                result -> result != null,
+                3,
+                1000
+        );
     }
 }

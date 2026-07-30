@@ -867,4 +867,58 @@ public final class RandomModelGenerator {
 
         return word.toString();
     }
+
+    public static String generateSingleWordProfileName() {
+        return generateRandomLettersWord();
+    }
+
+    public static String generateThreeWordProfileName() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord();
+    }
+
+    public static String generateProfileNameWithLeadingSpace() {
+        return " " + generateValidProfileName();
+    }
+
+    public static String generateProfileNameWithTrailingSpace() {
+        return generateValidProfileName() + " ";
+    }
+
+    public static String generateProfileNameWithDoubleSpace() {
+        return generateRandomLettersWord()
+                + "  "
+                + generateRandomLettersWord();
+    }
+
+    public static String generateProfileNameWithSpecialCharacter() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "%";
+    }
+
+    public static String generateProfileNameWithDigit() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "1";
+    }
+
+    public static String generateProfileNameWithHyphen() {
+        return generateRandomLettersWord()
+                + " "
+                + generateRandomLettersWord()
+                + "-"
+                + generateRandomLettersWord();
+    }
+
+    public static String generateOnlySpacesProfileName() {
+        int spacesCount = RANDOM.nextInt(2, 11);
+
+        return " ".repeat(spacesCount);
+    }
 }

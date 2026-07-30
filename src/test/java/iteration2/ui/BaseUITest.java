@@ -5,15 +5,22 @@ import api.models.CreateUserRequest;
 import api.specs.RequestSpecs;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import common.extentions.AdminSessionExtension;
+import common.extentions.BrowserMatchExtension;
+import common.extentions.UserSessionExtension;
 import iteration2.api.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 
 import static com.codeborne.selenide.Selenide.closeWebDriver;
 import static com.codeborne.selenide.Selenide.executeJavaScript;
 
+@ExtendWith(AdminSessionExtension.class)
+@ExtendWith(UserSessionExtension.class)
+@ExtendWith(BrowserMatchExtension.class)
 public class BaseUITest extends BaseTest {
     @BeforeAll
     public static void setUpSelenoid(){

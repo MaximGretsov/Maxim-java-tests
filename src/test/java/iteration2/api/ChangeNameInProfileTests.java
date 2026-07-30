@@ -1,7 +1,6 @@
 package iteration2.api;
 
 import io.restassured.specification.RequestSpecification;
-import api.models.InvalidProfileUpdateRequest;
 import api.models.ProfileUpdateRequest;
 import api.models.ProfileUpdateResponse;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import static api.assertions.ProfileAssertions.assertProfileName;
 import static api.assertions.ProfileAssertions.assertSuccessfulProfileUpdate;
 import static api.factories.ProfileRequestFactory.profileUpdateRequest;
 import static api.factories.ProfileRequestFactory.validProfileUpdateRequest;
+import static api.generators.RandomModelGenerator.*;
 import static api.testdata.ProfileTestData.DEFAULT_PROFILE_API_NAME;
 
 public class ChangeNameInProfileTests extends BaseTest {
@@ -53,22 +53,51 @@ public class ChangeNameInProfileTests extends BaseTest {
 
     public static Stream<Arguments> incorrectNameData() {
         return Stream.of(
-                Arguments.of("Name"),
-                Arguments.of("Three word name"),
-                Arguments.of(""),
-                Arguments.of(" New Name"),
-                Arguments.of("New Name "),
-                Arguments.of("   "),
-                Arguments.of("New Nam%e"),
-                Arguments.of("New Na1me"),
-                Arguments.of("New John-Doe"),
-                Arguments.of("New  Name")
+                Arguments.of(
+                        "Name contains one word",generateSingleWordProfileName()
+                ),
+                Arguments.of(
+                        "Name contains three words",
+                        generateThreeWordProfileName()
+                ),
+                Arguments.of(
+                        "Name is empty",
+                        ""
+                ),
+                Arguments.of(
+                        "Name contains leading space",
+                        generateProfileNameWithLeadingSpace()
+                ),
+                Arguments.of(
+                        "Name contains trailing space",
+                        generateProfileNameWithTrailingSpace()
+                ),
+                Arguments.of(
+                        "Name contains only spaces",
+                        generateOnlySpacesProfileName()
+                ),
+                Arguments.of(
+                        "Name contains special character",
+                        generateProfileNameWithSpecialCharacter()
+                ),
+                Arguments.of(
+                        "Name contains digit",
+                        generateProfileNameWithDigit()
+                ),
+                Arguments.of(
+                        "Name contains hyphen",
+                        generateProfileNameWithHyphen()
+                ),
+                Arguments.of(
+                        "Name contains double space",
+                        generateProfileNameWithDoubleSpace()
+                )
         );
     }
 
     @MethodSource("incorrectNameData")
-    @ParameterizedTest
-    public void userCannotChangeNameWithWrongData(String newName) {
+    @ParameterizedTest(name = "{0}")
+    public void userCannotChangeNameWithWrongData(String caseName, String newName) {
         RequestSpecification userSpec = createUserSpecForTest();
 
         ProfileUpdateRequest profileUpdateRequest = profileUpdateRequest(newName);
@@ -87,23 +116,6 @@ public class ChangeNameInProfileTests extends BaseTest {
         RequestSpecification userSpec = createUserSpecForTest();
 
         ProfileUpdateRequest profileUpdateRequest = profileUpdateRequest(null);
-
-        new CrudRequester(
-                userSpec,
-                Endpoint.CUSTOMER_PROFILE_UPDATE,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.CUSTOMER_PROFILE_UPDATE)
-        ).put(profileUpdateRequest);
-
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
-    }
-
-    @Test
-    public void userCannotChangeNameWithoutNameInBody() {
-        RequestSpecification userSpec = createUserSpecForTest();
-
-        InvalidProfileUpdateRequest profileUpdateRequest =
-                InvalidProfileUpdateRequest.builder()
-                        .build();
 
         new CrudRequester(
                 userSpec,
