@@ -9,6 +9,7 @@ import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.ResponseSpecs;
 
 public class ProfileSteps {
+    //Получение профиля
     @Step("Get customer profile")
     public static CustomerProfileResponse getProfile(RequestSpecification userSpec) {
         return StepLogger.log("User gets customer profile", () ->
