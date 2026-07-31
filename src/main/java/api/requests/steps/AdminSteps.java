@@ -1,6 +1,7 @@
 package api.requests.steps;
 
 import api.generators.RandomModelGenerator;
+import common.helpers.StepLogger;
 import io.qameta.allure.Step;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
@@ -15,11 +16,19 @@ import java.util.List;
 public class AdminSteps {
     @Step("Create user by admin")
     public static CreateUserRequest createUser() {
-        CreateUserRequest userRequest = RandomModelGenerator.generate(CreateUserRequest.class);
+        CreateUserRequest userRequest =
+                RandomModelGenerator.generate(CreateUserRequest.class);
 
-        createUserAndGetResponse(userRequest);
+        return StepLogger.log("Admin creates user " + userRequest.getUsername(), () -> {
+                    new ValidatedCrudRequester<CreateUserResponse>(
+                            RequestSpecs.adminSpec(),
+                            Endpoint.ADMIN_USER,
+                            ResponseSpecs.entityWasCreated())
+                            .post(userRequest);
 
-        return userRequest;
+                    return userRequest;
+                }
+        );
     }
 
     @Step("Create user by admin and get response")
@@ -42,10 +51,11 @@ public class AdminSteps {
 
     @Step("Get All Users")
     public static List<CreateUserResponse> getAllUsers(){
-        return new ValidatedCrudRequester<CreateUserResponse>(
-                RequestSpecs.adminSpec(),
-                Endpoint.ADMIN_USER,
-                ResponseSpecs.requestReturnsOk()
-        ).getAll(CreateUserResponse[].class);
+        return StepLogger.log("Admin gets all users", () -> {
+            return new ValidatedCrudRequester<CreateUserResponse>(
+                    RequestSpecs.adminSpec(),
+                    Endpoint.ADMIN_USER,
+                    ResponseSpecs.requestReturnsOk()).getAll(CreateUserResponse[].class);
+        });
     }
 }

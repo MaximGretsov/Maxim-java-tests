@@ -2,6 +2,7 @@ package ui.pages;
 
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.UiStepLogger;
 import lombok.Getter;
 
 import static com.codeborne.selenide.Condition.*;
@@ -20,30 +21,47 @@ public class DepositPage extends BasePage<DepositPage>{
     }
 
     public DepositPage selectAccount(int accountId) {
-        accountSelector
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .selectOptionByValue(String.valueOf(accountId));
+        return UiStepLogger.log(
+                "Select account " + accountId + " for deposit",
+                () -> {
+                    accountSelector
+                            .shouldBe(visible, enabled)
+                            .selectOptionByValue(
+                                    String.valueOf(accountId)
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public DepositPage enterAmount(float amount){
-        String amountValue = Float.toString(amount);
+    public DepositPage enterAmount(float amount) {
+        return UiStepLogger.log(
+                "Enter deposit amount " + amount,
+                () -> {
+                    String amountValue =
+                            Float.toString(amount);
 
-        amountInput
-                .setValue(amountValue)
-                .shouldHave(exactValue(amountValue));
+                    amountInput
+                            .shouldBe(visible, enabled)
+                            .setValue(amountValue)
+                            .shouldHave(exactValue(amountValue));
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public DepositPage submitDeposit() {
-        depositButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+        return UiStepLogger.log(
+                "Submit deposit",
+                () -> {
+                    depositButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 }

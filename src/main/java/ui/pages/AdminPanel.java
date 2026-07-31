@@ -3,6 +3,8 @@ package ui.pages;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
+import common.helpers.UiStepLogger;
 import lombok.Getter;
 import common.utils.RetryUtils;
 import ui.elements.UserBage;
@@ -23,23 +25,37 @@ public class AdminPanel extends BasePage<AdminPanel>{
     }
 
     public AdminPanel createUser(String username, String password) {
-        usernameInput.sendKeys(username);
-        passwordInput.sendKeys(password);
-        addUserButton.click();
-        return this;
+        return UiStepLogger.log(
+                "Admin creates user " + username,
+                () -> {
+                    usernameInput.sendKeys(username);
+                    passwordInput.sendKeys(password);
+                    addUserButton.click();
+                    return this;
+                }
+        );
     }
 
     public List<UserBage> getAllUsers() {
-        ElementsCollection elementsCollection =  $(Selectors.byText("All Users")).parent().findAll("li");
-        return generatePageElements(elementsCollection, UserBage::new);
+        return UiStepLogger.log("Get all users from Dashboard",  () -> {
+            ElementsCollection elementsCollection = $(Selectors.byText("All Users")).parent().findAll("li");
+            return generatePageElements(elementsCollection, UserBage::new);
+        });
     }
 
     public UserBage findUserByUsername(String username) {
-        return RetryUtils.retry(
-                () -> getAllUsers().stream().filter(it -> it.getUsername().equals(username)).findAny().orElse(null),
+        return UiStepLogger.log(
+                "Find user by username: " + username,
+                () -> RetryUtils.retry(
+                "Find user by username: " + username,
+                () -> getAllUsers()
+                        .stream()
+                        .filter(user -> user.getUsername().equals(username))
+                        .findAny()
+                        .orElse(null),
                 result -> result != null,
                 3,
-                1000
+                1000)
         );
     }
 }

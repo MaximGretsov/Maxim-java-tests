@@ -3,6 +3,7 @@ package ui.pages;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.UiStepLogger;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.Condition.*;
@@ -82,160 +83,258 @@ public class TransferPage extends BasePage<TransferPage> {
         return "/transfer";
     }
 
-    public TransferPage selectSenderAccount(int senderAccountId) {
-        accountSelector
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .selectOptionByValue(
-                        String.valueOf(senderAccountId)
-                );
+    public TransferPage selectSenderAccount(
+            int senderAccountId
+    ) {
+        return UiStepLogger.log(
+                "Select sender account " + senderAccountId,
+                () -> {
+                    accountSelector
+                            .shouldBe(visible, enabled)
+                            .selectOptionByValue(
+                                    String.valueOf(
+                                            senderAccountId
+                                    )
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public TransferPage enterReceiverName(String receiverName) {
-        recipientNameInput
-                .shouldBe(visible)
-                .setValue(receiverName)
-                .shouldHave(exactValue(receiverName));
+    public TransferPage enterReceiverName(
+            String receiverName
+    ) {
+        return UiStepLogger.log(
+                "Enter receiver name " + receiverName,
+                () -> {
+                    recipientNameInput
+                            .shouldBe(visible, enabled)
+                            .setValue(receiverName)
+                            .shouldHave(
+                                    exactValue(receiverName)
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage enterReceiverAccountNumber(
             String receiverAccountNumber
     ) {
-        recipientAccountNumberInput
-                .shouldBe(visible)
-                .setValue(receiverAccountNumber)
-                .shouldHave(exactValue(receiverAccountNumber));
+        return UiStepLogger.log(
+                "Enter receiver account number "
+                        + receiverAccountNumber,
+                () -> {
+                    recipientAccountNumberInput
+                            .shouldBe(visible, enabled)
+                            .setValue(
+                                    receiverAccountNumber
+                            )
+                            .shouldHave(
+                                    exactValue(
+                                            receiverAccountNumber
+                                    )
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public TransferPage enterTransferAmount(float transferAmount) {
-        String transferAmountValue =
-                Float.toString(transferAmount);
+    public TransferPage enterTransferAmount(
+            float transferAmount
+    ) {
+        return UiStepLogger.log(
+                "Enter transfer amount " + transferAmount,
+                () -> {
+                    String transferAmountValue =
+                            Float.toString(transferAmount);
 
-        transferAmountInput
-                .shouldBe(visible)
-                .setValue(transferAmountValue)
-                .shouldHave(exactValue(transferAmountValue));
+                    transferAmountInput
+                            .shouldBe(visible, enabled)
+                            .setValue(transferAmountValue)
+                            .shouldHave(
+                                    exactValue(
+                                            transferAmountValue
+                                    )
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage confirmTransferDetails() {
-        confirmationCheckbox
-                .shouldBe(visible)
-                .setSelected(true)
-                .shouldBe(selected);
+        return UiStepLogger.log(
+                "Confirm transfer details",
+                () -> {
+                    confirmationCheckbox
+                            .shouldBe(visible, enabled)
+                            .setSelected(true)
+                            .shouldBe(selected);
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage submitTransfer() {
-        sendTransferButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+        return UiStepLogger.log(
+                "Submit transfer",
+                () -> {
+                    sendTransferButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage openTransferAgain() {
-        transferAgainButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+        return UiStepLogger.log(
+                "Open transfer again form",
+                () -> {
+                    transferAgainButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public TransferPage searchTransactions(String username) {
-        transactionSearchInput
-                .shouldBe(visible)
-                .setValue(username)
-                .shouldHave(exactValue(username));
+    public TransferPage searchTransactions(
+            String username
+    ) {
+        return UiStepLogger.log(
+                "Search transactions for user " + username,
+                () -> {
+                    transactionSearchInput
+                            .shouldBe(visible, enabled)
+                            .setValue(username)
+                            .shouldHave(exactValue(username));
 
-        searchTransactionsButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+                    searchTransactionsButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage openRepeatTransferFor(
             String transactionType
     ) {
-        transactionItems
-                .findBy(text(transactionType))
-                .shouldBe(visible)
-                .$("button")
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+        return UiStepLogger.log(
+                "Open repeat transfer for "
+                        + transactionType,
+                () -> {
+                    transactionItems
+                            .findBy(text(transactionType))
+                            .shouldBe(visible)
+                            .$("button")
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        repeatTransferModal
-                .shouldBe(visible)
-                .shouldHave(text("Repeat Transfer"));
+                    repeatTransferModal
+                            .shouldBe(visible)
+                            .shouldHave(
+                                    text("Repeat Transfer")
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage selectRepeatSenderAccount(
             int senderAccountId
     ) {
-        repeatSenderAccountSelector
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .selectOptionByValue(
-                        String.valueOf(senderAccountId)
-                );
+        return UiStepLogger.log(
+                "Select repeat sender account "
+                        + senderAccountId,
+                () -> {
+                    repeatSenderAccountSelector
+                            .shouldBe(visible, enabled)
+                            .selectOptionByValue(
+                                    String.valueOf(
+                                            senderAccountId
+                                    )
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public TransferPage enterRepeatTransferAmount(float amount) {
-        String amountValue = Float.toString(amount);
+    public TransferPage enterRepeatTransferAmount(
+            float amount
+    ) {
+        return UiStepLogger.log(
+                "Enter repeat transfer amount " + amount,
+                () -> {
+                    String amountValue =
+                            Float.toString(amount);
 
-        repeatTransferAmountInput
-                .shouldBe(visible)
-                .setValue(amountValue)
-                .shouldHave(exactValue(amountValue));
+                    repeatTransferAmountInput
+                            .shouldBe(visible, enabled)
+                            .setValue(amountValue)
+                            .shouldHave(
+                                    exactValue(amountValue)
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage confirmRepeatTransferDetails() {
-        repeatConfirmationCheckbox
-                .shouldBe(visible)
-                .setSelected(true)
-                .shouldBe(selected);
+        return UiStepLogger.log(
+                "Confirm repeat transfer details",
+                () -> {
+                    repeatConfirmationCheckbox
+                            .shouldBe(visible, enabled)
+                            .setSelected(true)
+                            .shouldBe(selected);
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage submitRepeatTransfer() {
-        repeatTransferButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+        return UiStepLogger.log(
+                "Submit repeat transfer",
+                () -> {
+                    repeatTransferButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage checkSearchResultsAreEmpty() {
-        transactionsList.should(exist);
+        return UiStepLogger.log(
+                "Check that transaction search is empty",
+                () -> {
+                    transactionsList.should(exist);
+                    transactionItems.shouldHave(size(0));
+                    repeatButtons.shouldHave(size(0));
 
-        transactionItems.shouldHave(size(0));
-        repeatButtons.shouldHave(size(0));
-
-        return this;
+                    return this;
+                }
+        );
     }
 
     public TransferPage openIncomingTransferForRepeat() {
-        return openRepeatTransferFor(INCOMING_TRANSFER_TYPE);
+        return openRepeatTransferFor(
+                INCOMING_TRANSFER_TYPE
+        );
     }
 }

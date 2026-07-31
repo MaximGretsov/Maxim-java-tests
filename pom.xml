@@ -83,18 +83,33 @@
         </dependency>
 
         <!-- Allure -->
+        <!-- Подключение к JUnit 5 -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
-            <version>${allure.version}</version>
+            <version>2.29.1</version>
         </dependency>
 
+        <!-- Для API тестов с RestAssured -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>2.29.1</version>
+        </dependency>
+
+        <!-- Для UI тестов с Selenide -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-selenide</artifactId>
-            <version>${allure.version}</version>
+            <version>2.29.1</version>
         </dependency>
 
+        <!-- Для улучшения отображения assertThat -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-assertj</artifactId>
+            <version>2.29.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -146,6 +161,12 @@
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>true</failOnViolation>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.15.2</version>
             </plugin>
 
         </plugins>

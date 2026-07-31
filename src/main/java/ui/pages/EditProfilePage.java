@@ -4,6 +4,7 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.WebDriverRunner;
+import common.helpers.UiStepLogger;
 import common.utils.RetryUtils;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -23,40 +24,54 @@ public class EditProfilePage extends BasePage<EditProfilePage>{
     }
 
     public EditProfilePage changeName(String newName) {
-        newNameInput.shouldBe(visible, enabled);
+        return UiStepLogger.log(
+                "Change profile name to " + newName,
+                () -> {
+                    newNameInput.shouldBe(visible, enabled);
 
-        AtomicInteger stableChecks = new AtomicInteger();
+                    AtomicInteger stableChecks =
+                            new AtomicInteger();
 
-        new WebDriverWait(
-                WebDriverRunner.getWebDriver(),
-                Duration.ofSeconds(5)
-        )
-                .pollingEvery(Duration.ofMillis(200))
-                .until(driver -> {
-                    String actualValue = newNameInput.getValue();
+                    new WebDriverWait(
+                            WebDriverRunner.getWebDriver(),
+                            Duration.ofSeconds(5)
+                    )
+                            .pollingEvery(
+                                    Duration.ofMillis(200)
+                            )
+                            .until(driver -> {
+                                String actualValue =
+                                        newNameInput.getValue();
 
-                    if (!newName.equals(actualValue)) {
-                        newNameInput.setValue(newName);
-                        stableChecks.set(0);
-                        return false;
-                    }
+                                if (!newName.equals(actualValue)) {
+                                    newNameInput.setValue(newName);
+                                    stableChecks.set(0);
+                                    return false;
+                                }
 
-                    return stableChecks.incrementAndGet() >= 2;
-                });
+                                return stableChecks
+                                        .incrementAndGet() >= 2;
+                            });
 
-        saveChangesButton
-                .shouldBe(visible, enabled)
-                .click();
+                    saveChangesButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return this;
+                    return this;
+                }
+        );
     }
 
-    public UserDashboard openUserDashboard(){
-        homeButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+    public UserDashboard openUserDashboard() {
+        return UiStepLogger.log(
+                "Open user dashboard",
+                () -> {
+                    homeButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return page(UserDashboard.class);
+                    return page(UserDashboard.class);
+                }
+        );
     }
 }

@@ -3,6 +3,7 @@ package api.requests.skeleton.requesters;
 import api.models.CreateUserResponse;
 import api.requests.skeleton.interfaces.GetAllEndpointInterface;
 import api.specs.RequestSpecs;
+import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -21,13 +22,16 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface,
 
     @Override
     public ValidatableResponse post(BaseModel model) {
-        var body = model == null ? "" : model;
-        return given()
-                .spec(requestSpecification)
-                .body(body)
-                .post(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification);
+        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
+            var body = model == null ? "" : model;
+            return given()
+                    .spec(requestSpecification)
+                    .body(body)
+                    .post(endpoint.getUrl())
+                    .then()
+                    .assertThat()
+                    .spec(responseSpecification);
+        });
     }
 
     public ValidatableResponse post() {

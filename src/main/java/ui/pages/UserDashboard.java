@@ -3,6 +3,7 @@ package ui.pages;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.UiStepLogger;
 import lombok.Getter;
 import org.openqa.selenium.Alert;
 
@@ -26,73 +27,128 @@ public class UserDashboard extends BasePage<UserDashboard>{
         return "/dashboard";
     }
 
-    public UserDashboard createNewAccount(){
-        createNewAccount.click();
-        return this;
+    public UserDashboard createNewAccount() {
+        return UiStepLogger.log(
+                "Create new account",
+                () -> {
+                    createNewAccount
+                            .shouldBe(visible, enabled)
+                            .click();
+
+                    return this;
+                }
+        );
     }
 
-    public DepositPage openDepositPage(){
-        depositMoneyButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+    public DepositPage openDepositPage() {
+        return UiStepLogger.log(
+                "Open deposit page",
+                () -> {
+                    depositMoneyButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return page(DepositPage.class);
+                    return page(DepositPage.class);
+                }
+        );
     }
 
-    public TransferPage openTransferPage(){
-        transferButton
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+    public TransferPage openTransferPage() {
+        return UiStepLogger.log(
+                "Open transfer page",
+                () -> {
+                    transferButton
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return page(TransferPage.class);
+                    return page(TransferPage.class);
+                }
+        );
     }
 
-    public EditProfilePage openEditProfile(){
-        userInfo
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .click();
+    public EditProfilePage openEditProfile() {
+        return UiStepLogger.log(
+                "Open profile editing page",
+                () -> {
+                    userInfo
+                            .shouldBe(visible, enabled)
+                            .click();
 
-        return page(EditProfilePage.class);
+                    return page(EditProfilePage.class);
+                }
+        );
     }
 
-    public UserDashboard checkDisplayedName(String expectedName){
-         welcomeTextSpan
-                .shouldBe(visible)
-                .shouldHave(exactText(expectedName));
-         return this;
+    public UserDashboard checkDisplayedName(
+            String expectedName
+    ) {
+        return UiStepLogger.log(
+                "Check displayed profile name "
+                        + expectedName,
+                () -> {
+                    welcomeTextSpan
+                            .shouldBe(visible)
+                            .shouldHave(
+                                    exactText(expectedName)
+                            );
+
+                    return this;
+                }
+        );
     }
 
     public String checkNewAccountCreatedAlertAndAccept() {
-        Alert alert = switchTo().alert();
-        String actualMessage = alert.getText();
-        String expectedMessage = BankAlert.NEW_ACCOUNT_CREATED.getMessage();
+        return UiStepLogger.log(
+                "Check new account alert and accept it",
+                () -> {
+                    Alert alert = switchTo().alert();
+                    String actualMessage = alert.getText();
 
-        assertThat(actualMessage)
-                .startsWith(expectedMessage);
+                    String expectedMessage =
+                            BankAlert.NEW_ACCOUNT_CREATED
+                                    .getMessage();
 
-        String accountNumber = actualMessage
-                .substring(expectedMessage.length())
-                .trim();
+                    assertThat(actualMessage)
+                            .startsWith(expectedMessage);
 
-        alert.accept();
+                    String accountNumber = actualMessage
+                            .substring(
+                                    expectedMessage.length()
+                            )
+                            .trim();
 
-        return accountNumber;
+                    alert.accept();
+
+                    return accountNumber;
+                }
+        );
     }
 
-    public UserDashboard shouldHaveWelcomeText(String profileName) {
-        welcomeText
-                .shouldBe(Condition.visible)
-                .shouldHave(Condition.exactText(
-                        WELCOME_TEXT_TEMPLATE.formatted(profileName)
-                ));
+    public UserDashboard shouldHaveWelcomeText(
+            String profileName
+    ) {
+        return UiStepLogger.log(
+                "Check welcome text for " + profileName,
+                () -> {
+                    welcomeText
+                            .shouldBe(visible)
+                            .shouldHave(
+                                    exactText(
+                                            WELCOME_TEXT_TEMPLATE
+                                                    .formatted(
+                                                            profileName
+                                                    )
+                                    )
+                            );
 
-        return this;
+                    return this;
+                }
+        );
     }
 
     public UserDashboard shouldHaveDefaultWelcomeText() {
-        return shouldHaveWelcomeText(DEFAULT_PROFILE_NAME);
+        return shouldHaveWelcomeText(
+                DEFAULT_PROFILE_NAME
+        );
     }
 }

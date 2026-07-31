@@ -6,6 +6,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.UiStepLogger;
 import org.openqa.selenium.Alert;
 import ui.elements.BaseElement;
 
@@ -29,18 +30,27 @@ public abstract class BasePage<T extends BasePage> {
     }
 
     public T checkAlertMessageAndAccept(String bankAlert){
-        Alert alert = switchTo().alert();
-        assertThat(alert.getText())
-                .isEqualTo(bankAlert);
-        alert.accept();
-
-        return (T) this;
+        return UiStepLogger.log(
+                "Check alert message and accept alert",
+                () -> {
+                    Alert alert = switchTo().alert();
+                    assertThat(alert.getText())
+                            .isEqualTo(bankAlert);
+                    alert.accept();
+                    return (T) this;
+                }
+        );
     }
 
     public static void authAsUser(String username, String password) {
-        Selenide.open("/");
-        String userAuthHeader = RequestSpecs.getUserAuthHeader(username, password);
-        executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+        UiStepLogger.log(
+                "Authorize in browser as user " + username,
+                () -> {
+                    Selenide.open("/");
+                    String userAuthHeader = RequestSpecs.getUserAuthHeader(username, password);
+                    executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+                }
+        );
     }
 
     public static void authAsUser(CreateUserRequest createUserRequest) {
