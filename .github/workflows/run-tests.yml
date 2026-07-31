@@ -118,6 +118,15 @@ jobs:
           subfolder: test-report
           keep_reports: 20
 
+      - name: Fix report directory permissions
+        if: always()
+        run: |
+          for directory in allure-history allure-report gh-pages; do
+            if [ -e "$directory" ]; then
+              sudo chown -R "$(id -u):$(id -g)" "$directory"
+            fi
+          done
+
       - name: Arrange reports
         if: always()
         shell: bash
@@ -152,6 +161,8 @@ jobs:
           if [ -f "swagger-coverage-results.json" ]; then
             cp swagger-coverage-results.json \
               "$SWAGGER_DIR/swagger-coverage-results.json"
+          else
+            echo "::warning::Swagger coverage JSON report was not created"
           fi
 
           cat > "$RUN_DIR/index.html" <<'EOF'
@@ -163,7 +174,12 @@ jobs:
             <title>Test reports</title>
           </head>
           <body>
-            <a href="allure-report/index.html">Open Allure report</a>
+            <p>
+              <a href="allure-report/index.html">Open Allure report</a>
+            </p>
+            <p>
+              <a href="swagger-coverage/index.html">Open Swagger coverage report</a>
+            </p>
           </body>
           </html>
           EOF
