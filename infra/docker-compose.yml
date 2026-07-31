@@ -33,8 +33,14 @@ services:
       - "4444:4444"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/:/etc/selenoid/:ro
-    command: ["-container-network", "nbank-network"]
+      - ./config/browsers.json:/etc/selenoid/browsers.json:ro
+    command:
+      - "-conf"
+      - "/etc/selenoid/browsers.json"
+      - "-container-network"
+      - "nbank-network"
+      - "-limit"
+      - "10"
     depends_on:
       - frontend
     networks:
@@ -44,7 +50,9 @@ services:
     image: aerokube/selenoid-ui:latest
     ports:
       - "8080:8080"
-    command: ["--selenoid-uri", "http://selenoid:4444"]
+    command:
+      - "--selenoid-uri"
+      - "http://selenoid:4444"
     depends_on:
       - selenoid
     networks:
