@@ -4,7 +4,7 @@ import api.generators.RandomModelGenerator;
 import api.models.DepositRequest;
 
 public class DepositRequestFactory {
-
+    // factory
     private DepositRequestFactory() {
     }
 
