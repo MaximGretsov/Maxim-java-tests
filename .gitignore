@@ -5,3 +5,11 @@ allure-results/
 test-output/
 logs/
 *.iml
+target/
+allure-report/
+.allure-history-backup/
+swagger-coverage-output/
+swagger-coverage-report.html
+swagger-coverage-results.json
+swagger-coverage-1.5.0.zip
+Selenoid/

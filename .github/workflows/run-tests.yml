@@ -1,51 +1,134 @@
-name: Build and push tests image
+name: Run tests
 
 on:
   push:
     paths:
       - 'src/**'
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build-checkstyle-and-push:
-    name: Build, Checkstyle and Docker push
+  run-tests:
+    name: Set up services and run tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
+          distribution: corretto
           java-version: '21'
-          cache: 'maven'
 
-      - name: Make Maven wrapper executable
-        run: chmod +x mvnw
-
-      - name: Build project with Maven
-        run: ./mvnw clean package -DskipTests
-
-      - name: Run Checkstyle
-        run: ./mvnw checkstyle:check
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v4
+      - name: Cache Maven repository
+        uses: actions/cache@v4
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Prepare scripts
+        run: |
+          chmod +x ./mvnw
+          chmod +x ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
+      - name: Set up services
+        run: docker compose -f infra/docker-compose.yml up -d
+
+      - name: Wait for services
+        run: |
+          for attempt in {1..60}; do
+            if curl -fsS http://localhost:4111/v3/api-docs > /dev/null &&
+               curl -fsS http://localhost:4444/status > /dev/null; then
+              echo "Backend and Selenoid are ready"
+              exit 0
+            fi
+
+            echo "Waiting for services: attempt $attempt"
+            sleep 2
+          done
+
+          echo "Services did not start in time"
+          docker compose -f infra/docker-compose.yml ps
+          docker compose -f infra/docker-compose.yml logs
+          exit 1
+
+      - name: Run tests
+        run: ./mvnw clean test -q
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://frontend
+          APIVERSION: /api/v1
+
+      - name: Run Swagger coverage
+        if: always()
+        run: |
+          ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline \
+            -s http://localhost:4111/v3/api-docs \
+            -i swagger-coverage-output
+
+      - name: Load test report history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/senior-api-tests:${{ github.sha }}
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure report
+        uses: simple-elf/allure-report-action@v1.15
+        if: always()
+        with:
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          subfolder: test-report
+          keep_reports: 20
+
+      - name: Arrange reports
+        if: always()
+        shell: bash
+        run: |
+          RUN_DIR="allure-history/test-report/${{ github.run_number }}"
+          ALLURE_DIR="$RUN_DIR/allure-report"
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage"
+
+          mkdir -p "$ALLURE_DIR"
+          mkdir -p "$SWAGGER_DIR"
+
+          find "$RUN_DIR" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            ! -name "allure-report" \
+            ! -name "swagger-coverage" \
+            -exec mv {} "$ALLURE_DIR/" \;
+
+          cp swagger-coverage-report.html \
+            "$SWAGGER_DIR/index.html"
+
+          cp swagger-coverage-results.json \
+            "$SWAGGER_DIR/swagger-coverage-results.json"
+
+          cat > "$RUN_DIR/index.html" <<'EOF'
+          <!doctype html>
+          <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=allure-report/index.html">
+          EOF
+
+      - name: Publish test reports
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Clean up services
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down
