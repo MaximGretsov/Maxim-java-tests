@@ -1,9 +1,7 @@
 package api.requests.skeleton.requesters;
 
 import api.configs.Config;
-import api.models.CreateUserResponse;
 import api.requests.skeleton.interfaces.GetAllEndpointInterface;
-import api.specs.RequestSpecs;
 import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
