@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Contains reusable request specifications for API tests.
 public class RequestSpecs {
     private static Map<String,String> authHeaders = new HashMap<>(Map.of("admin", "Basic YWRtaW46YWRtaW4="));
     private RequestSpecs(){};
