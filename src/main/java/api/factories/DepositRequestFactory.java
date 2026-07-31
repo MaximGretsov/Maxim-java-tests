@@ -4,11 +4,9 @@ import api.generators.RandomModelGenerator;
 import api.models.DepositRequest;
 
 public class DepositRequestFactory {
-    // factory
     private DepositRequestFactory() {
     }
 
-    // valid Deposit Request
     public static DepositRequest validDepositRequest(int accountId) {
         return DepositRequest.builder()
                 .id(accountId)
@@ -16,7 +14,6 @@ public class DepositRequestFactory {
                 .build();
     }
 
-    // deposit Request with amount
     public static DepositRequest depositRequestWithAmount(int accountId, float depositAmount) {
         return DepositRequest.builder()
                 .id(accountId)
