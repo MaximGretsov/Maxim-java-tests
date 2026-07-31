@@ -37,40 +37,67 @@ jobs:
           chmod +x ./mvnw
           chmod +x ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline
 
+      - name: Pull Chrome image for Selenoid
+        run: docker pull selenoid/vnc_chrome:128.0
+
       - name: Set up services
         run: docker compose -f infra/docker-compose.yml up -d
 
       - name: Wait for services
         run: |
           for attempt in {1..60}; do
-            if curl -fsS http://localhost:4111/v3/api-docs > /dev/null &&
-               curl -fsS http://localhost:4444/status > /dev/null; then
-              echo "Backend and Selenoid are ready"
+            BACKEND_READY=false
+            FRONTEND_READY=false
+            SELENOID_READY=false
+
+            if curl -fsS http://localhost:4111/v3/api-docs > /dev/null; then
+              BACKEND_READY=true
+            fi
+
+            if curl -fsS http://localhost:3000 > /dev/null; then
+              FRONTEND_READY=true
+            fi
+
+            if curl -fsS http://localhost:4444/status > /dev/null; then
+              SELENOID_READY=true
+            fi
+
+            if [ "$BACKEND_READY" = true ] &&
+               [ "$FRONTEND_READY" = true ] &&
+               [ "$SELENOID_READY" = true ]; then
+              echo "All services are ready"
+              docker compose -f infra/docker-compose.yml ps
               exit 0
             fi
 
-            echo "Waiting for services: attempt $attempt"
+            echo "Waiting for services: attempt $attempt/60"
             sleep 2
           done
 
-          echo "Services did not start in time"
+          echo "::error::Services did not start in time"
           docker compose -f infra/docker-compose.yml ps
-          docker compose -f infra/docker-compose.yml logs
+          docker compose -f infra/docker-compose.yml logs --no-color
           exit 1
 
       - name: Run tests
         run: ./mvnw clean test -q
         env:
           APIBASEURL: http://localhost:4111
-          UIBASEURL: http://frontend
+          UIBASEURL: http://nginx
           APIVERSION: /api/v1
 
       - name: Run Swagger coverage
         if: always()
         run: |
-          ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline \
-            -s http://localhost:4111/v3/api-docs \
-            -i swagger-coverage-output
+          if [ -d "swagger-coverage-output" ] &&
+             [ -n "$(find swagger-coverage-output -type f -print -quit)" ]; then
+
+            bash ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline \
+              -s http://localhost:4111/v3/api-docs \
+              -i swagger-coverage-output
+          else
+            echo "::warning::Swagger coverage output was not created"
+          fi
 
       - name: Load test report history
         uses: actions/checkout@v4
@@ -102,23 +129,43 @@ jobs:
           mkdir -p "$ALLURE_DIR"
           mkdir -p "$SWAGGER_DIR"
 
-          find "$RUN_DIR" \
-            -mindepth 1 \
-            -maxdepth 1 \
-            ! -name "allure-report" \
-            ! -name "swagger-coverage" \
-            -exec mv {} "$ALLURE_DIR/" \;
+          shopt -s dotglob nullglob
 
-          cp swagger-coverage-report.html \
-            "$SWAGGER_DIR/index.html"
+          for item in "$RUN_DIR"/*; do
+            item_name="$(basename "$item")"
 
-          cp swagger-coverage-results.json \
-            "$SWAGGER_DIR/swagger-coverage-results.json"
+            if [ "$item_name" = "allure-report" ] ||
+               [ "$item_name" = "swagger-coverage" ]; then
+              continue
+            fi
+
+            mv "$item" "$ALLURE_DIR/"
+          done
+
+          if [ -f "swagger-coverage-report.html" ]; then
+            cp swagger-coverage-report.html \
+              "$SWAGGER_DIR/index.html"
+          else
+            echo "::warning::Swagger coverage HTML report was not created"
+          fi
+
+          if [ -f "swagger-coverage-results.json" ]; then
+            cp swagger-coverage-results.json \
+              "$SWAGGER_DIR/swagger-coverage-results.json"
+          fi
 
           cat > "$RUN_DIR/index.html" <<'EOF'
           <!doctype html>
-          <meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=allure-report/index.html">
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=allure-report/index.html">
+            <title>Test reports</title>
+          </head>
+          <body>
+            <a href="allure-report/index.html">Open Allure report</a>
+          </body>
+          </html>
           EOF
 
       - name: Publish test reports
@@ -131,4 +178,5 @@ jobs:
 
       - name: Clean up services
         if: always()
-        run: docker compose -f infra/docker-compose.yml down
+        run: |
+          docker compose -f infra/docker-compose.yml down --remove-orphans
