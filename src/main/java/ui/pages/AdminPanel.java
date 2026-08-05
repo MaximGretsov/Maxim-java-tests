@@ -35,6 +35,14 @@ public class AdminPanel extends BasePage<AdminPanel>{
         return this;
     }
 
+    public AdminPanel shouldNotHaveUser(String username) {
+        getAllUsers()
+                .findBy(Condition.text(username))
+                .shouldNotBe(Condition.exist);
+
+        return this;
+    }
+
     public ElementsCollection getAllUsers() {
         return $(Selectors.byText("All Users")).parent().findAll("li");
     }
