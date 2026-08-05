@@ -50,11 +50,10 @@ public class CreateUserTest extends BaseUITest {
         // Шаг 2: админ создает юзера в банке
         CreateUserRequest newUser = RandomModelGenerator.generate(CreateUserRequest.class);
 
-        newUser.setUsername("a");
+        newUser.setUsername(RandomModelGenerator.generateInvalidName());
         new AdminPanel().open().createUser(newUser.getUsername(),newUser.getPassword())
                 .checkAlertMessageAndAccept(BankAlert.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS.getMessage())
-                .getAllUsers().findBy(Condition.exactText(newUser.getUsername() + "\nUSER"))
-                .shouldNotBe(Condition.exist);
+                .shouldNotHaveUser(newUser.getUsername());
 
         // Шаг 3: Проверка, что юзер НЕ создан на API
         long userWithSameUsernameAsNewUser = AdminSteps.getAllUsers().stream()
