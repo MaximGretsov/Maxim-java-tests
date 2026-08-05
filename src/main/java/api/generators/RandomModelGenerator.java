@@ -870,7 +870,7 @@ public final class RandomModelGenerator {
 
      // Метод для генерации некорректного имени
     public static String generateInvalidName() {
-        int wordLength = RANDOM.nextInt(1, 2);
+        int wordLength = RANDOM.nextInt(1, 3);
         String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         StringBuilder word = new StringBuilder();
 
