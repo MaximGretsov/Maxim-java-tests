@@ -921,4 +921,17 @@ public final class RandomModelGenerator {
 
         return " ".repeat(spacesCount);
     }
+
+    public static String generateInvalidName() {
+        int wordLength = RANDOM.nextInt(1, 2);
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        StringBuilder word = new StringBuilder();
+
+        for (int i = 0; i < wordLength; i++) {
+            int randomIndex = RANDOM.nextInt(letters.length());
+            word.append(letters.charAt(randomIndex));
+        }
+
+        return word.toString();
+    }
 }

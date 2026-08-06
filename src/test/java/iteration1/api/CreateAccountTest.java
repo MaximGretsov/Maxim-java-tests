@@ -1,6 +1,7 @@
 package iteration1.api;
 
 import api.models.CreateUserRequest;
+import iteration2.api.BaseTest;
 import org.junit.jupiter.api.Test;
 import api.requests.skeleton.Endpoint;
 import api.requests.skeleton.requesters.CrudRequester;
@@ -8,7 +9,7 @@ import api.requests.steps.AdminSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
-public class CreateAccountTest {
+public class CreateAccountTest extends BaseTest {
 
     @Test
     public void userCanCreateAccountTest(){
