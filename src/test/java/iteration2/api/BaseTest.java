@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BaseTest {
+
     protected SoftAssertions softy;
+
     private final List<Integer> usersForDeletion = new ArrayList<>();
 
     @BeforeEach
-    public void setUpTest(){
+    public void setUpTest() {
         this.softy = new SoftAssertions();
     }
 
@@ -29,9 +31,7 @@ public class BaseTest {
         CreateUserResponse userResponse =
                 AdminSteps.createUserAndGetResponse(userRequest);
 
-        usersForDeletion.add(
-                Math.toIntExact(userResponse.getId())
-        );
+        registerUserForDeletion(userResponse.getId());
 
         return userRequest;
     }
@@ -39,12 +39,15 @@ public class BaseTest {
     protected RequestSpecification createUserSpecForTest() {
         CreateUserRequest userRequest = createUserForTest();
 
-        return RequestSpecs.authAsUserSpec(
+        return RequestSpecs.authAsUser(
                 userRequest.getUsername(),
                 userRequest.getPassword()
         );
     }
 
+    protected void registerUserForDeletion(long userId) {
+        usersForDeletion.add(Math.toIntExact(userId));
+    }
 
     @AfterEach
     public void afterTest() {

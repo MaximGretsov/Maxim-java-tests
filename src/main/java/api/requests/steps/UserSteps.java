@@ -16,7 +16,7 @@ public class UserSteps {
     private final RequestSpecification userSpec;
 
     public UserSteps(String username, String password) {
-        this.userSpec = RequestSpecs.authAsUserSpec(
+        this.userSpec = RequestSpecs.authAsUser(
                 username,
                 password
         );

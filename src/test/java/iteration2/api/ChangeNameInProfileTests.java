@@ -1,5 +1,10 @@
 package iteration2.api;
 
+import api.dao.UserDao;
+import api.dao.comparison.DaoAndModelAssertions;
+import api.models.CustomerProfileResponse;
+import api.requests.steps.DataBaseSteps;
+import api.requests.steps.ProfileSteps;
 import io.restassured.specification.RequestSpecification;
 import api.models.ProfileUpdateRequest;
 import api.models.ProfileUpdateResponse;
@@ -28,8 +33,7 @@ public class ChangeNameInProfileTests extends BaseTest {
     public void userCanUpdateNameWithCorrectData() {
         RequestSpecification userSpec = createUserSpecForTest();
 
-        ProfileUpdateRequest profileUpdateRequest =
-                validProfileUpdateRequest();
+        ProfileUpdateRequest profileUpdateRequest = validProfileUpdateRequest();
 
         ProfileUpdateResponse profileUpdateResponse =
                 new ValidatedCrudRequester<ProfileUpdateResponse>(
@@ -38,17 +42,17 @@ public class ChangeNameInProfileTests extends BaseTest {
                         ResponseSpecs.requestReturnsOk()
                 ).put(profileUpdateRequest);
 
-        assertSuccessfulProfileUpdate(
-                softy,
-                profileUpdateRequest,
-                profileUpdateResponse
-        );
+        assertSuccessfulProfileUpdate(softy, profileUpdateRequest, profileUpdateResponse);
 
-        assertProfileName(
-                softy,
-                userSpec,
-                profileUpdateRequest.getName()
-        );
+        CustomerProfileResponse profileResponse = ProfileSteps.getProfile(userSpec);
+
+        assertProfileName(softy, profileResponse, profileUpdateRequest.getName());
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(profileResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(profileResponse, userDao)
+                .match();
     }
 
     public static Stream<Arguments> incorrectNameData() {
@@ -108,7 +112,15 @@ public class ChangeNameInProfileTests extends BaseTest {
                 ResponseSpecs.profileNameValidationError()
         ).put(profileUpdateRequest);
 
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
+        CustomerProfileResponse profileResponse = ProfileSteps.getProfile(userSpec);
+
+        assertProfileName(softy, profileResponse, DEFAULT_PROFILE_API_NAME);
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(profileResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(profileResponse, userDao)
+                .match();
     }
 
     @Test
@@ -120,10 +132,20 @@ public class ChangeNameInProfileTests extends BaseTest {
         new CrudRequester(
                 userSpec,
                 Endpoint.CUSTOMER_PROFILE_UPDATE,
-                ResponseSpecs.internalServerErrorForEndpoint(Endpoint.CUSTOMER_PROFILE_UPDATE)
+                ResponseSpecs.internalServerErrorForEndpoint(
+                        Endpoint.CUSTOMER_PROFILE_UPDATE
+                )
         ).put(profileUpdateRequest);
 
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
+        CustomerProfileResponse profileResponse = ProfileSteps.getProfile(userSpec);
+
+        assertProfileName(softy, profileResponse, DEFAULT_PROFILE_API_NAME);
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(profileResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(profileResponse, userDao)
+                .match();
     }
 
     @Test
@@ -138,7 +160,15 @@ public class ChangeNameInProfileTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).put(profileUpdateRequest);
 
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
+        CustomerProfileResponse profileResponse = ProfileSteps.getProfile(userSpec);
+
+        assertProfileName(softy, profileResponse, DEFAULT_PROFILE_API_NAME);
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(profileResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(profileResponse, userDao)
+                .match();
     }
 
     @Test
@@ -153,6 +183,14 @@ public class ChangeNameInProfileTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).put(profileUpdateRequest);
 
-        assertProfileName(softy, userSpec, DEFAULT_PROFILE_API_NAME);
+        CustomerProfileResponse profileResponse = ProfileSteps.getProfile(userSpec);
+
+        assertProfileName(softy, profileResponse, DEFAULT_PROFILE_API_NAME);
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(profileResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(profileResponse, userDao)
+                .match();
     }
 }

@@ -1,9 +1,12 @@
 package iteration2.api;
 
+import api.dao.AccountDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.generators.RandomModelGenerator;
+import api.models.AccountResponse;
+import api.requests.steps.DataBaseSteps;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import api.models.InvalidTransferRequest;
 import api.models.TransferRequest;
 import api.models.TransferResponse;
 import org.junit.jupiter.api.Test;
@@ -27,33 +30,26 @@ import static api.testdata.AccountTestData.PREPARED_SENDER_BALANCE;
 import static api.testdata.AccountTestData.SMALL_SENDER_BALANCE;
 
 public class TransferTests extends BaseTest {
+
     @Test
     public void userCanTransferToAnotherUserAccountWithRandomCorrectAmount() {
         RequestSpecification senderUserSpec = createUserSpecForTest();
+
         int senderAccountId = AccountSteps.createAccount(senderUserSpec);
-        AccountSteps.prepareAccountForTransfer(
-                senderUserSpec,
-                senderAccountId
-        );
+
+        AccountSteps.prepareAccountForTransfer(senderUserSpec, senderAccountId);
 
         RequestSpecification receiverUserSpec = createUserSpecForTest();
-        int receiverAccountId =
-                AccountSteps.createAccount(receiverUserSpec);
 
-        float amount =
-                RandomModelGenerator.generateValidTransferAmount();
+        int receiverAccountId = AccountSteps.createAccount(receiverUserSpec);
 
-        float senderExpectedBalance =
-                PREPARED_SENDER_BALANCE - amount;
+        float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        float receiverExpectedBalance =
-                EMPTY_ACCOUNT_BALANCE + amount;
+        float senderExpectedBalance = PREPARED_SENDER_BALANCE - amount;
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        float receiverExpectedBalance = EMPTY_ACCOUNT_BALANCE + amount;
+
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         TransferResponse transferResponse =
                 new ValidatedCrudRequester<TransferResponse>(
@@ -62,25 +58,27 @@ public class TransferTests extends BaseTest {
                         ResponseSpecs.requestReturnsOk()
                 ).post(transferRequest);
 
-        assertSuccessfulTransferResponse(
-                softy,
-                transferRequest,
-                transferResponse
-        );
+        assertSuccessfulTransferResponse(softy, transferRequest, transferResponse);
 
-        assertAccountBalance(
-                softy,
-                senderUserSpec,
-                senderAccountId,
-                senderExpectedBalance
-        );
+        AccountResponse senderAccount = AccountSteps.getAccountById(senderUserSpec, senderAccountId);
 
-        assertAccountBalance(
-                softy,
-                receiverUserSpec,
-                receiverAccountId,
-                receiverExpectedBalance
-        );
+        assertAccountBalance(softy, senderAccount, senderAccountId, senderExpectedBalance);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(receiverUserSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, receiverExpectedBalance);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     public static Stream<Arguments> correctBoundaryTransferData() {
@@ -97,28 +95,20 @@ public class TransferTests extends BaseTest {
             float amount
     ) {
         RequestSpecification senderUserSpec = createUserSpecForTest();
+
         int senderAccountId = AccountSteps.createAccount(senderUserSpec);
 
-        AccountSteps.prepareAccountForTransfer(
-                senderUserSpec,
-                senderAccountId
-        );
+        AccountSteps.prepareAccountForTransfer(senderUserSpec, senderAccountId);
 
         RequestSpecification receiverUserSpec = createUserSpecForTest();
-        int receiverAccountId =
-                AccountSteps.createAccount(receiverUserSpec);
 
-        float senderExpectedBalance =
-                PREPARED_SENDER_BALANCE - amount;
+        int receiverAccountId = AccountSteps.createAccount(receiverUserSpec);
 
-        float receiverExpectedBalance =
-                EMPTY_ACCOUNT_BALANCE + amount;
+        float senderExpectedBalance = PREPARED_SENDER_BALANCE - amount;
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        float receiverExpectedBalance = EMPTY_ACCOUNT_BALANCE + amount;
+
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         TransferResponse transferResponse =
                 new ValidatedCrudRequester<TransferResponse>(
@@ -127,56 +117,50 @@ public class TransferTests extends BaseTest {
                         ResponseSpecs.requestReturnsOk()
                 ).post(transferRequest);
 
-        assertSuccessfulTransferResponse(
-                softy,
-                transferRequest,
-                transferResponse
-        );
+        assertSuccessfulTransferResponse(softy, transferRequest, transferResponse);
 
-        assertAccountBalance(
-                softy,
-                senderUserSpec,
-                senderAccountId,
-                senderExpectedBalance
-        );
+        AccountResponse senderAccount = AccountSteps.getAccountById(senderUserSpec, senderAccountId);
 
-        assertAccountBalance(
-                softy,
-                receiverUserSpec,
-                receiverAccountId,
-                receiverExpectedBalance
-        );
+        assertAccountBalance(softy, senderAccount, senderAccountId, senderExpectedBalance);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount =
+                AccountSteps.getAccountById(
+                        receiverUserSpec,
+                        receiverAccountId
+                );
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, receiverExpectedBalance);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
     public void userCanTransferBetweenOwnAccountsWithRandomCorrectAmount() {
         RequestSpecification userSpec = createUserSpecForTest();
 
-        int senderAccountId =
-                AccountSteps.createAccount(userSpec);
+        int senderAccountId = AccountSteps.createAccount(userSpec);
 
-        int receiverAccountId =
-                AccountSteps.createAccount(userSpec);
+        int receiverAccountId = AccountSteps.createAccount(userSpec);
 
-        AccountSteps.prepareAccountForTransfer(
-                userSpec,
-                senderAccountId
-        );
+        AccountSteps.prepareAccountForTransfer(userSpec, senderAccountId);
 
-        float amount =
-                RandomModelGenerator.generateValidTransferAmount();
+        float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        float senderExpectedBalance =
-                PREPARED_SENDER_BALANCE - amount;
+        float senderExpectedBalance = PREPARED_SENDER_BALANCE - amount;
 
-        float receiverExpectedBalance =
-                EMPTY_ACCOUNT_BALANCE + amount;
+        float receiverExpectedBalance = EMPTY_ACCOUNT_BALANCE + amount;
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         TransferResponse transferResponse =
                 new ValidatedCrudRequester<TransferResponse>(
@@ -185,50 +169,55 @@ public class TransferTests extends BaseTest {
                         ResponseSpecs.requestReturnsOk()
                 ).post(transferRequest);
 
-        assertSuccessfulTransferResponse(
-                softy,
-                transferRequest,
-                transferResponse
-        );
+        assertSuccessfulTransferResponse(softy, transferRequest, transferResponse);
 
-        assertAccountBalance(
-                softy,
-                userSpec,
-                senderAccountId,
-                senderExpectedBalance
-        );
+        AccountResponse senderAccount = AccountSteps.getAccountById(userSpec, senderAccountId);
 
-        assertAccountBalance(
-                softy,
-                userSpec,
-                receiverAccountId,
-                receiverExpectedBalance
-        );
+        assertAccountBalance(softy, senderAccount, senderAccountId, senderExpectedBalance);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(userSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, receiverExpectedBalance);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     public static Stream<Arguments> incorrectBoundaryTransferAmountData() {
         return Stream.of(
-                Arguments.of(0f, ResponseSpecs.transferAmountLessThanMin()),
-                Arguments.of(10000.01f, ResponseSpecs.transferAmountMoreThanMax())
+                Arguments.of(
+                        0f,
+                        ResponseSpecs.transferAmountLessThanMin()
+                ),
+                Arguments.of(
+                        10000.01f,
+                        ResponseSpecs.transferAmountMoreThanMax()
+                )
         );
     }
 
     @MethodSource("incorrectBoundaryTransferAmountData")
     @ParameterizedTest
     public void userCannotTransferWithBoundaryIncorrectAmount(float amount,
-                                                              ResponseSpecification responseSpecification) {
+            ResponseSpecification responseSpecification) {
         RequestSpecification userSpec = createUserSpecForTest();
 
         int senderAccountId = AccountSteps.createAccount(userSpec);
+
         int receiverAccountId = AccountSteps.createAccount(userSpec);
 
         AccountSteps.prepareAccountWithSmallBalance(userSpec, senderAccountId);
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 userSpec,
@@ -236,8 +225,25 @@ public class TransferTests extends BaseTest {
                 responseSpecification
         ).post(transferRequest);
 
-        assertAccountBalance(softy, userSpec, senderAccountId, SMALL_SENDER_BALANCE);
-        assertAccountBalance(softy, userSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(userSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, SMALL_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(userSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     public static Stream<Arguments> incorrectRandomTransferAmountData() {
@@ -256,19 +262,16 @@ public class TransferTests extends BaseTest {
     @MethodSource("incorrectRandomTransferAmountData")
     @ParameterizedTest
     public void userCannotTransferWithRandomIncorrectAmount(float amount,
-                                                            ResponseSpecification responseSpecification) {
+            ResponseSpecification responseSpecification) {
         RequestSpecification userSpec = createUserSpecForTest();
 
         int senderAccountId = AccountSteps.createAccount(userSpec);
+
         int receiverAccountId = AccountSteps.createAccount(userSpec);
 
         AccountSteps.prepareAccountWithSmallBalance(userSpec, senderAccountId);
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 userSpec,
@@ -276,8 +279,25 @@ public class TransferTests extends BaseTest {
                 responseSpecification
         ).post(transferRequest);
 
-        assertAccountBalance(softy, userSpec, senderAccountId, SMALL_SENDER_BALANCE);
-        assertAccountBalance(softy, userSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(userSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, SMALL_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(userSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
@@ -285,19 +305,14 @@ public class TransferTests extends BaseTest {
         RequestSpecification userSpec = createUserSpecForTest();
 
         int senderAccountId = AccountSteps.createAccount(userSpec);
+
         int receiverAccountId = AccountSteps.createAccount(userSpec);
 
         AccountSteps.prepareAccountWithSmallBalance(userSpec, senderAccountId);
 
-        float amount = RandomModelGenerator.generateTransferAmountMoreThanBalance(
-                SMALL_SENDER_BALANCE
-        );
+        float amount = RandomModelGenerator.generateTransferAmountMoreThanBalance(SMALL_SENDER_BALANCE);
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 userSpec,
@@ -305,8 +320,25 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.invalidTransfer()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, userSpec, senderAccountId, SMALL_SENDER_BALANCE);
-        assertAccountBalance(softy, userSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(userSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, SMALL_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(userSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
@@ -314,18 +346,15 @@ public class TransferTests extends BaseTest {
         RequestSpecification userSpec = createUserSpecForTest();
 
         int senderAccountId = AccountSteps.createAccount(userSpec);
+
         AccountSteps.prepareAccountForTransfer(userSpec, senderAccountId);
 
-        int nonExistingAccountId =
-                RandomModelGenerator.generateNonExistingAccountIdBasedOn(senderAccountId);
+        int nonExistingAccountId = RandomModelGenerator
+                        .generateNonExistingAccountIdBasedOn(senderAccountId);
 
         float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                nonExistingAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, nonExistingAccountId, amount);
 
         new CrudRequester(
                 userSpec,
@@ -333,7 +362,15 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.invalidTransfer()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, userSpec, senderAccountId, PREPARED_SENDER_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(userSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, PREPARED_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
     }
 
     @Test
@@ -342,16 +379,12 @@ public class TransferTests extends BaseTest {
 
         int receiverAccountId = AccountSteps.createAccount(userSpec);
 
-        int nonExistingAccountId =
-                RandomModelGenerator.generateNonExistingAccountIdBasedOn(receiverAccountId);
+        int nonExistingAccountId = RandomModelGenerator
+                        .generateNonExistingAccountIdBasedOn(receiverAccountId);
 
         float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        TransferRequest transferRequest = transferRequest(
-                nonExistingAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(nonExistingAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 userSpec,
@@ -359,25 +392,32 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.unauthorizedAccessToAccount()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, userSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse receiverAccount = AccountSteps.getAccountById(userSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
     public void userCannotTransferFromAnotherUserAccount() {
         RequestSpecification senderUserSpec = createUserSpecForTest();
+
         int senderAccountId = AccountSteps.createAccount(senderUserSpec);
+
         AccountSteps.prepareAccountForTransfer(senderUserSpec, senderAccountId);
 
         RequestSpecification receiverUserSpec = createUserSpecForTest();
+
         int receiverAccountId = AccountSteps.createAccount(receiverUserSpec);
 
         float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 receiverUserSpec,
@@ -385,26 +425,42 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.unauthorizedAccessToAccount()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, senderUserSpec, senderAccountId, PREPARED_SENDER_BALANCE);
-        assertAccountBalance(softy, receiverUserSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(senderUserSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, PREPARED_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(receiverUserSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
     public void userCannotTransferWithoutAuthorization() {
         RequestSpecification senderUserSpec = createUserSpecForTest();
+
         int senderAccountId = AccountSteps.createAccount(senderUserSpec);
+
         AccountSteps.prepareAccountForTransfer(senderUserSpec, senderAccountId);
 
         RequestSpecification receiverUserSpec = createUserSpecForTest();
+
         int receiverAccountId = AccountSteps.createAccount(receiverUserSpec);
 
         float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 RequestSpecs.unauthSpec(),
@@ -412,26 +468,42 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, senderUserSpec, senderAccountId, PREPARED_SENDER_BALANCE);
-        assertAccountBalance(softy, receiverUserSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(senderUserSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, PREPARED_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount = AccountSteps.getAccountById(receiverUserSpec, receiverAccountId);
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 
     @Test
     public void userCannotTransferWithWrongAuthorizationToken() {
         RequestSpecification senderUserSpec = createUserSpecForTest();
+
         int senderAccountId = AccountSteps.createAccount(senderUserSpec);
+
         AccountSteps.prepareAccountForTransfer(senderUserSpec, senderAccountId);
 
         RequestSpecification receiverUserSpec = createUserSpecForTest();
+
         int receiverAccountId = AccountSteps.createAccount(receiverUserSpec);
 
         float amount = RandomModelGenerator.generateValidTransferAmount();
 
-        TransferRequest transferRequest = transferRequest(
-                senderAccountId,
-                receiverAccountId,
-                amount
-        );
+        TransferRequest transferRequest = transferRequest(senderAccountId, receiverAccountId, amount);
 
         new CrudRequester(
                 RequestSpecs.brokenAuthSpec(),
@@ -439,7 +511,28 @@ public class TransferTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).post(transferRequest);
 
-        assertAccountBalance(softy, senderUserSpec, senderAccountId, PREPARED_SENDER_BALANCE);
-        assertAccountBalance(softy, receiverUserSpec, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+        AccountResponse senderAccount = AccountSteps.getAccountById(senderUserSpec, senderAccountId);
+
+        assertAccountBalance(softy, senderAccount, senderAccountId, PREPARED_SENDER_BALANCE);
+
+        AccountDao senderAccountDao = DataBaseSteps.getAccountById((long) senderAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(senderAccount, senderAccountDao)
+                .match();
+
+        AccountResponse receiverAccount =
+                AccountSteps.getAccountById(
+                        receiverUserSpec,
+                        receiverAccountId
+                );
+
+        assertAccountBalance(softy, receiverAccount, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
+
+        AccountDao receiverAccountDao = DataBaseSteps.getAccountById((long) receiverAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(receiverAccount, receiverAccountDao)
+                .match();
     }
 }

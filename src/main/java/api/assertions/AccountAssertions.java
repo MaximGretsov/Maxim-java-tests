@@ -19,43 +19,16 @@ public class AccountAssertions {
     private AccountAssertions() {
     }
 
-    public static void assertAccountIsEmpty(SoftAssertions softy,
-                                            RequestSpecification userSpec,
-                                            int accountId) {
-        AccountResponse account = AccountSteps.getAccountById(userSpec, accountId);
-
-        ModelAssertions.assertThatModels(expectedEmptyAccount(accountId), account).match();
-
-        softy.assertThat(account.getTransactions())
-                .isEmpty();
-    }
-
-    public static void assertAccountAfterSuccessfulDeposit(SoftAssertions softy,
-                                                           RequestSpecification userSpec,
-                                                           DepositRequest depositRequest) {
-        AccountResponse account = AccountSteps.getAccountById(userSpec, depositRequest.getId());
-
-        ModelAssertions.assertThatModels(depositRequest, account).match();
-
-        softy.assertThat(account.getTransactions())
-                .isNotEmpty();
-    }
-
-    public static void assertAccountBalance(SoftAssertions softy,
-                                            RequestSpecification userSpec,
-                                            int accountId,
-                                            float expectedBalance) {
-        AccountResponse account = AccountSteps.getAccountById(userSpec, accountId);
-
-        softy.assertThat(account.getId())
-                .isEqualTo(accountId);
-
-        softy.assertThat(account.getBalance())
-                .isCloseTo(expectedBalance, within(FLOAT_ASSERTION_OFFSET));
-    }
-
-    private static AccountResponse expectedEmptyAccount(int accountId) {
-        return new AccountResponse(accountId, null, EMPTY_ACCOUNT_BALANCE, List.of());
+    public static void assertAccountIsEmpty(
+            SoftAssertions softy,
+            RequestSpecification userSpec,
+            int accountId
+    ) {
+        assertAccountIsEmpty(
+                softy,
+                AccountSteps.getAccountById(userSpec, accountId),
+                accountId
+        );
     }
 
     public static void assertAccountIsEmpty(
@@ -63,12 +36,24 @@ public class AccountAssertions {
             UserSteps userSteps,
             int accountId
     ) {
-        AccountResponse account = userSteps.getAccountById(accountId);
+        assertAccountIsEmpty(
+                softy,
+                userSteps.getAccountById(accountId),
+                accountId
+        );
+    }
 
-        ModelAssertions.assertThatModels(
-                expectedEmptyAccount(accountId),
-                account
-        ).match();
+    public static void assertAccountIsEmpty(
+            SoftAssertions softy,
+            AccountResponse account,
+            int accountId
+    ) {
+        ModelAssertions
+                .assertThatModels(
+                        expectedEmptyAccount(accountId),
+                        account
+                )
+                .match();
 
         softy.assertThat(account.getTransactions())
                 .isEmpty();
@@ -76,19 +61,65 @@ public class AccountAssertions {
 
     public static void assertAccountAfterSuccessfulDeposit(
             SoftAssertions softy,
+            RequestSpecification userSpec,
+            DepositRequest depositRequest
+    ) {
+        assertAccountAfterSuccessfulDeposit(
+                softy,
+                AccountSteps.getAccountById(
+                        userSpec,
+                        depositRequest.getId()
+                ),
+                depositRequest
+        );
+    }
+
+    public static void assertAccountAfterSuccessfulDeposit(
+            SoftAssertions softy,
             UserSteps userSteps,
             DepositRequest depositRequest
     ) {
-        AccountResponse account =
-                userSteps.getAccountById(depositRequest.getId());
+        assertAccountAfterSuccessfulDeposit(
+                softy,
+                userSteps.getAccountById(depositRequest.getId()),
+                depositRequest
+        );
+    }
 
-        ModelAssertions.assertThatModels(
-                depositRequest,
-                account
-        ).match();
+    public static void assertAccountAfterSuccessfulDeposit(
+            SoftAssertions softy,
+            AccountResponse account,
+            DepositRequest depositRequest
+    ) {
+        ModelAssertions
+                .assertThatModels(
+                        depositRequest,
+                        account
+                )
+                .match();
 
         softy.assertThat(account.getTransactions())
                 .isNotEmpty();
+    }
+
+    public static void assertAccountBalance(
+            SoftAssertions softy,
+            RequestSpecification userSpec,
+            int accountId,
+            float expectedBalance
+    ) {
+        AccountResponse account =
+                AccountSteps.getAccountById(
+                        userSpec,
+                        accountId
+                );
+
+        assertAccountBalance(
+                softy,
+                account,
+                accountId,
+                expectedBalance
+        );
     }
 
     public static void assertAccountBalance(
@@ -100,6 +131,20 @@ public class AccountAssertions {
         AccountResponse account =
                 userSteps.getAccountById(accountId);
 
+        assertAccountBalance(
+                softy,
+                account,
+                accountId,
+                expectedBalance
+        );
+    }
+
+    public static void assertAccountBalance(
+            SoftAssertions softy,
+            AccountResponse account,
+            int accountId,
+            float expectedBalance
+    ) {
         softy.assertThat(account.getId())
                 .isEqualTo(accountId);
 
@@ -108,5 +153,16 @@ public class AccountAssertions {
                         expectedBalance,
                         within(FLOAT_ASSERTION_OFFSET)
                 );
+    }
+
+    private static AccountResponse expectedEmptyAccount(
+            int accountId
+    ) {
+        return new AccountResponse(
+                accountId,
+                null,
+                EMPTY_ACCOUNT_BALANCE,
+                List.of()
+        );
     }
 }
