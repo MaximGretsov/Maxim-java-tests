@@ -13,7 +13,7 @@ public enum BankAlert {
     PROFILE_UPDATED_SUCCESSFULLY("✅ Name updated successfully!"),
     ENTER_VALID_NAME("Name must contain two words with letters only"),
     GOOD_TRANSFER( "✅ Successfully transferred $%s to account %s!"),
-    AMOUNT_MUST_BE_MORE_THAN_MINIMUM("❌ Error: Transfer amount must be at least 0.01"),
+    AMOUNT_MUST_BE_MORE_THAN_MINIMUM("❌ Error: Invalid transfer: insufficient funds or invalid accounts"),
     REPEAT_TRANSFER_SUCCESS("✅ Transfer of $%s successful from Account %s to %s!"),
     NO_MATCHING_USERS_FOUND("❌ No matching users found."),
     REPEAT_TRANSFER_FAILED("❌ Transfer failed: Please try again.");

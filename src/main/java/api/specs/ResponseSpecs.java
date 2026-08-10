@@ -17,7 +17,7 @@ public class ResponseSpecs {
     private static final String UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account";
     private static final int INTERNAL_SERVER_ERROR_STATUS = 500;
     private static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
-    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Transfer amount must be at least 0.01";
+    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Invalid transfer: insufficient funds or invalid accounts";
     private static final String TRANSFER_AMOUNT_MORE_THAN_MAX = "Transfer amount cannot exceed 10000";
     private static final String INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts";
     private static final String PROFILE_NAME_VALIDATION_MESSAGE = "Name must contain two words with letters only";
