@@ -16,4 +16,5 @@ public class TransactionResponse {
     private String timestamp;
     private String timestampAsString;
     private int relatedAccountId;
+    private Double amountAsDouble;
 }
