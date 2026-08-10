@@ -22,14 +22,13 @@ public class DepositTests extends BaseUITest{
 
         int accountId = userSteps.createAccount();
 
-        assertAccountIsEmpty(
-                softy,
-                userSteps,
-                accountId
-        );
+        String accountNumber = userSteps
+                .getAccountById(accountId)
+                .getAccountNumber();
 
-        float depositAmount =
-                RandomModelGenerator.generateValidDepositAmount();
+        assertAccountIsEmpty(softy, userSteps, accountId);
+
+        float depositAmount = RandomModelGenerator.generateValidDepositAmount();
 
         new UserDashboard()
                 .open()
@@ -37,24 +36,11 @@ public class DepositTests extends BaseUITest{
                 .selectAccount(accountId)
                 .enterAmount(depositAmount)
                 .submitDeposit()
-                .checkAlertMessageAndAccept(
-                        BankAlert.GOOD_DEPOSIT.format(
-                                depositAmount,
-                                accountId
-                        )
-                );
+                .checkAlertMessageAndAccept(BankAlert.GOOD_DEPOSIT.format(depositAmount, accountNumber));
 
-        DepositRequest expectedDeposit =
-                depositRequestWithAmount(
-                        accountId,
-                        depositAmount
-                );
+        DepositRequest expectedDeposit = depositRequestWithAmount(accountId, depositAmount);
 
-        assertAccountAfterSuccessfulDeposit(
-                softy,
-                userSteps,
-                expectedDeposit
-        );
+        assertAccountAfterSuccessfulDeposit(softy, userSteps, expectedDeposit);
     }
 
     @Test
@@ -64,14 +50,9 @@ public class DepositTests extends BaseUITest{
 
         int accountId = userSteps.createAccount();
 
-        assertAccountIsEmpty(
-                softy,
-                userSteps,
-                accountId
-        );
+        assertAccountIsEmpty(softy, userSteps, accountId);
 
-        float incorrectDepositAmount =
-                RandomModelGenerator.generateNegativeDepositAmount();
+        float incorrectDepositAmount = RandomModelGenerator.generateNegativeDepositAmount();
 
         new UserDashboard()
                 .open()
@@ -79,14 +60,8 @@ public class DepositTests extends BaseUITest{
                 .selectAccount(accountId)
                 .enterAmount(incorrectDepositAmount)
                 .submitDeposit()
-                .checkAlertMessageAndAccept(
-                        BankAlert.BAD_DEPOSIT.getMessage()
-                );
+                .checkAlertMessageAndAccept(BankAlert.BAD_DEPOSIT.getMessage());
 
-        assertAccountIsEmpty(
-                softy,
-                userSteps,
-                accountId
-        );
+        assertAccountIsEmpty(softy, userSteps, accountId);
     }
 }
