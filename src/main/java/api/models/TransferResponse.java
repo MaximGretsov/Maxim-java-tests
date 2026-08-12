@@ -10,8 +10,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TransferResponse extends BaseModel {
+    private String status;
     private String message;
-    private float amount;
+    private int transactionId;
     private int senderAccountId;
     private int receiverAccountId;
+    private double amount;
+    private double fraudRiskScore;
+    private String fraudReason;
+    private boolean requiresVerification;
+    private boolean requiresManualReview;
 }

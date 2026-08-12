@@ -16,4 +16,17 @@ public class TransferRequestFactory {
                 .amount(amount)
                 .build();
     }
+
+    public static TransferRequest fraudCheckTransferRequest(
+            int senderAccountId,
+            int receiverAccountId,
+            double amount
+    ) {
+        return TransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(receiverAccountId)
+                .amount(amount)
+                .description("Test transfer with fraud check")
+                .build();
+    }
 }

@@ -10,97 +10,168 @@ import api.requests.skeleton.Endpoint;
 import java.util.List;
 
 public class ResponseSpecs {
-    private ResponseSpecs(){};
 
-    private static final String DEPOSIT_AMOUNT_LESS_THAN_MIN =  "Invalid account or amount";
-    private static final String DEPOSIT_AMOUNT_MORE_THAN_MAX = "Deposit amount exceeds the 5000 limit";
-    private static final String UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account";
+    private ResponseSpecs() {
+    }
+
+    private static final String DEPOSIT_AMOUNT_LESS_THAN_MIN =
+            "Invalid account or amount";
+    private static final String DEPOSIT_AMOUNT_MORE_THAN_MAX =
+            "Deposit amount exceeds the 5000 limit";
+
+    private static final String UNAUTHORIZED_ACCESS_TO_ACCOUNT =
+            "Unauthorized access to account";
+
     private static final int INTERNAL_SERVER_ERROR_STATUS = 500;
-    private static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
-    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Invalid transfer: insufficient funds or invalid accounts";
-    private static final String TRANSFER_AMOUNT_MORE_THAN_MAX = "Transfer amount cannot exceed 10000";
-    private static final String INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts";
-    private static final String PROFILE_NAME_VALIDATION_MESSAGE = "Name must contain two words with letters only";
-    public static final String TRANSFER_SUCCESS_MESSAGE = "Transfer successful";
-    public static final String PROFILE_UPDATE_SUCCESS_MESSAGE = "Profile updated successfully";
+    private static final String INTERNAL_SERVER_ERROR_TEXT =
+            "Internal Server Error";
 
-    private static ResponseSpecBuilder defaultResponseBuilder(){
+    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN =
+            "Invalid transfer: insufficient funds or invalid accounts";
+    private static final String TRANSFER_AMOUNT_MORE_THAN_MAX =
+            "Transfer amount cannot exceed 10000";
+    private static final String INVALID_TRANSFER =
+            "Invalid transfer: insufficient funds or invalid accounts";
+
+    private static final String PROFILE_NAME_VALIDATION_MESSAGE =
+            "Name must contain two words with letters only";
+
+    public static final String TRANSFER_SUCCESS_MESSAGE =
+            "Transfer successful";
+    public static final String PROFILE_UPDATE_SUCCESS_MESSAGE =
+            "Profile updated successfully";
+
+
+    private static ResponseSpecBuilder defaultResponseBuilder() {
         return new ResponseSpecBuilder();
     }
 
+
     // 201
-    public static ResponseSpecification entityWasCreated(){
+    public static ResponseSpecification entityWasCreated() {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_CREATED)
                 .build();
     }
 
+
     // 200
-    public static ResponseSpecification requestReturnsOk(){
+    public static ResponseSpecification requestReturnsOk() {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
                 .build();
     }
 
+
     // успешный депозит
-    public static ResponseSpecification successfulDepositResponse(int accountId, float expectedBalance){
+    public static ResponseSpecification successfulDepositResponse(
+            int accountId,
+            float expectedBalance
+    ) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
                 .expectBody("id", Matchers.equalTo(accountId))
                 .expectBody("accountNumber", Matchers.startsWith("ACC"))
                 .expectBody("balance", Matchers.comparesEqualTo(expectedBalance))
-                .expectBody("transactions", Matchers.notNullValue())
+                .expectBody("transactionId", Matchers.notNullValue())
                 .build();
     }
 
+
     // успешный трансфер
-    public static ResponseSpecification successfulTransferResponse(float expectedAmount,
-                                                                   int senderAccountId,
-                                                                   int receiverAccountId) {
+    public static ResponseSpecification successfulTransferResponse(
+            float expectedAmount,
+            int senderAccountId,
+            int receiverAccountId
+    ) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
                 .expectBody("amount", Matchers.equalTo(expectedAmount))
-                .expectBody("receiverAccountId", Matchers.equalTo(receiverAccountId))
-                .expectBody("senderAccountId", Matchers.equalTo(senderAccountId))
-                .expectBody("message", Matchers.equalTo(TRANSFER_SUCCESS_MESSAGE))
+                .expectBody(
+                        "receiverAccountId",
+                        Matchers.equalTo(receiverAccountId)
+                )
+                .expectBody(
+                        "senderAccountId",
+                        Matchers.equalTo(senderAccountId)
+                )
+                .expectBody(
+                        "message",
+                        Matchers.equalTo(TRANSFER_SUCCESS_MESSAGE)
+                )
                 .build();
     }
 
+
     // успешное изменение профиля
-    public static ResponseSpecification successfulProfileUpdateResponse(String expectedName){
+    public static ResponseSpecification successfulProfileUpdateResponse(
+            String expectedName
+    ) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
                 .expectBody(
                         "message",
                         Matchers.equalTo(PROFILE_UPDATE_SUCCESS_MESSAGE)
                 )
-                .expectBody("customer.name", Matchers.equalTo(expectedName))
+                .expectBody(
+                        "customer.name",
+                        Matchers.equalTo(expectedName)
+                )
                 .build();
     }
 
-    // 400 для ошибок с ключом
-    public static ResponseSpecification requestReturnsBadRequest(String errorKey, List<String> errorValues){
+
+    // 400 для ошибок с ключом и списком значений
+    public static ResponseSpecification requestReturnsBadRequest(
+            String errorKey,
+            List<String> errorValues
+    ) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
-                .expectBody(errorKey,Matchers.containsInAnyOrder(errorValues.toArray()))
+                .expectBody(
+                        errorKey,
+                        Matchers.containsInAnyOrder(errorValues.toArray())
+                )
                 .build();
     }
 
-    // 400 для ошибок без ключа
-    public static ResponseSpecification requestReturnsBadRequestWithText(String errorText){
+
+    // 400 для старого формата ответа обычным текстом
+    public static ResponseSpecification requestReturnsBadRequestWithText(
+            String errorText
+    ) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
                 .expectBody(Matchers.equalTo(errorText))
                 .build();
     }
 
-    // 403
-    public static ResponseSpecification unauthorizedAccessToAccount(){
+
+    // 400 для нового формата {"message": "..."}
+    public static ResponseSpecification requestReturnsBadRequestWithMessage(
+            String errorMessage
+    ) {
         return defaultResponseBuilder()
-                .expectStatusCode(HttpStatus.SC_FORBIDDEN)
-                .expectBody(Matchers.equalTo(UNAUTHORIZED_ACCESS_TO_ACCOUNT))
+                .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
+                .expectBody(
+                        "message",
+                        Matchers.equalTo(errorMessage)
+                )
                 .build();
     }
+
+
+    // 403
+    public static ResponseSpecification unauthorizedAccessToAccount() {
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_FORBIDDEN)
+                .expectBody(
+                        "message",
+                        Matchers.equalTo(UNAUTHORIZED_ACCESS_TO_ACCOUNT)
+                )
+                .build();
+    }
+
 
     // 401
     public static ResponseSpecification unauthorized() {
@@ -109,45 +180,76 @@ public class ResponseSpecs {
                 .build();
     }
 
-    // 500 (ответ приходит объектом)
-    public static ResponseSpecification internalServerErrorForEndpoint(Endpoint endpoint) {
-        String expectedPath = Config.getProperty("apiVersion") + endpoint.getUrl();
+
+    // 500
+    public static ResponseSpecification internalServerErrorForEndpoint(
+            Endpoint endpoint
+    ) {
+        String expectedPath =
+                Config.getProperty("apiVersion") + endpoint.getUrl();
 
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                .expectBody("status", Matchers.equalTo(INTERNAL_SERVER_ERROR_STATUS))
-                .expectBody("error", Matchers.equalTo(INTERNAL_SERVER_ERROR_TEXT))
-                .expectBody("path", Matchers.equalTo(expectedPath))
+                .expectBody(
+                        "status",
+                        Matchers.equalTo(INTERNAL_SERVER_ERROR_STATUS)
+                )
+                .expectBody(
+                        "error",
+                        Matchers.equalTo(INTERNAL_SERVER_ERROR_TEXT)
+                )
+                .expectBody(
+                        "path",
+                        Matchers.equalTo(expectedPath)
+                )
                 .build();
     }
 
+
     // 400 если депозит меньше минимума
     public static ResponseSpecification depositAmountLessThanMin() {
-        return requestReturnsBadRequestWithText(DEPOSIT_AMOUNT_LESS_THAN_MIN);
+        return requestReturnsBadRequestWithMessage(
+                DEPOSIT_AMOUNT_LESS_THAN_MIN
+        );
     }
 
-    // 400 если депозит больше минимума
+
+    // 400 если депозит больше максимума
     public static ResponseSpecification depositAmountMoreThanMax() {
-        return requestReturnsBadRequestWithText(DEPOSIT_AMOUNT_MORE_THAN_MAX);
+        return requestReturnsBadRequestWithMessage(
+                DEPOSIT_AMOUNT_MORE_THAN_MAX
+        );
     }
+
 
     // 400 если трансфер меньше минимума
     public static ResponseSpecification transferAmountLessThanMin() {
-        return requestReturnsBadRequestWithText(TRANSFER_AMOUNT_LESS_THAN_MIN);
+        return requestReturnsBadRequestWithMessage(
+                TRANSFER_AMOUNT_LESS_THAN_MIN
+        );
     }
 
-    // 400 если трансфер больше минимума
+
+    // 400 если трансфер больше максимума
     public static ResponseSpecification transferAmountMoreThanMax() {
-        return requestReturnsBadRequestWithText(TRANSFER_AMOUNT_MORE_THAN_MAX);
+        return requestReturnsBadRequestWithMessage(
+                TRANSFER_AMOUNT_MORE_THAN_MAX
+        );
     }
 
-    // 400 при невалдином трансфере
+
+    // 400 при невалидном трансфере
     public static ResponseSpecification invalidTransfer() {
-        return requestReturnsBadRequestWithText(INVALID_TRANSFER);
+        return requestReturnsBadRequestWithMessage(
+                INVALID_TRANSFER
+        );
     }
+
 
     // 400 при некорректном имени
     public static ResponseSpecification profileNameValidationError() {
-        return requestReturnsBadRequestWithText(PROFILE_NAME_VALIDATION_MESSAGE);
+        return requestReturnsBadRequestWithMessage(
+                PROFILE_NAME_VALIDATION_MESSAGE
+        );
     }
 }
