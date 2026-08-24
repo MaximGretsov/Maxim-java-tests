@@ -1,6 +1,7 @@
 package iteration2.api;
 
 import api.generators.RandomModelGenerator;
+import common.extentions.TimingExtension;
 import io.restassured.specification.RequestSpecification;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
@@ -9,10 +10,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import api.requests.steps.AdminSteps;
 import api.specs.RequestSpecs;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@ExtendWith(TimingExtension.class)
 public class BaseTest {
     protected SoftAssertions softy;
     private final List<Integer> usersForDeletion = new ArrayList<>();
