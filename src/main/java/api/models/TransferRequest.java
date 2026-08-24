@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 public class TransferRequest extends BaseModel {
     private int senderAccountId;
     private int receiverAccountId;
-    private double amount;
-    private String description;
+    private float amount;
 }

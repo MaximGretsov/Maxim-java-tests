@@ -56,7 +56,7 @@ public class AccountAssertions {
                 .match();
 
         softy.assertThat(account.getTransactions())
-                .isNullOrEmpty();
+                .isEmpty();
     }
 
     public static void assertAccountAfterSuccessfulDeposit(
@@ -97,6 +97,9 @@ public class AccountAssertions {
                         account
                 )
                 .match();
+
+        softy.assertThat(account.getTransactions())
+                .isNotEmpty();
     }
 
     public static void assertAccountBalance(
