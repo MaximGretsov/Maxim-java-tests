@@ -79,12 +79,21 @@ jobs:
           docker compose -f infra/docker-compose.yml logs --no-color
           exit 1
 
-      - name: Run tests
-        run: ./mvnw clean test -q
+      - name: Run fraud tests
+        if: github.ref_name == 'mock_tests'
+        run: ./mvnw clean test -q "-Dtest=iteration2.api.testsWithMock.TransferWithFraudCheckTest"
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://nginx
           APIVERSION: /api/v1
+
+      - name: Run full test suite
+        if: github.ref_name != 'mock_tests'
+        run: ./mvnw clean test -q
+        env:
+            APIBASEURL: http://localhost:4111
+            UIBASEURL: http://nginx
+            APIVERSION: /api/v1
 
       - name: Run Swagger coverage
         if: always()
