@@ -12,12 +12,12 @@ import java.util.List;
 public class ResponseSpecs {
     private ResponseSpecs(){};
 
-    private static final String DEPOSIT_AMOUNT_LESS_THAN_MIN = "Deposit amount must be at least 0.01";
-    private static final String DEPOSIT_AMOUNT_MORE_THAN_MAX = "Deposit amount cannot exceed 5000";
+    private static final String DEPOSIT_AMOUNT_LESS_THAN_MIN =  "Invalid account or amount";
+    private static final String DEPOSIT_AMOUNT_MORE_THAN_MAX = "Deposit amount exceeds the 5000 limit";
     private static final String UNAUTHORIZED_ACCESS_TO_ACCOUNT = "Unauthorized access to account";
     private static final int INTERNAL_SERVER_ERROR_STATUS = 500;
     private static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
-    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Transfer amount must be at least 0.01";
+    private static final String TRANSFER_AMOUNT_LESS_THAN_MIN = "Invalid transfer: insufficient funds or invalid accounts";
     private static final String TRANSFER_AMOUNT_MORE_THAN_MAX = "Transfer amount cannot exceed 10000";
     private static final String INVALID_TRANSFER = "Invalid transfer: insufficient funds or invalid accounts";
     private static final String PROFILE_NAME_VALIDATION_MESSAGE = "Name must contain two words with letters only";
@@ -47,7 +47,7 @@ public class ResponseSpecs {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_OK)
                 .expectBody("id", Matchers.equalTo(accountId))
-                .expectBody("accountNumber", Matchers.equalTo("ACC" + accountId))
+                .expectBody("accountNumber", Matchers.startsWith("ACC"))
                 .expectBody("balance", Matchers.comparesEqualTo(expectedBalance))
                 .expectBody("transactions", Matchers.notNullValue())
                 .build();

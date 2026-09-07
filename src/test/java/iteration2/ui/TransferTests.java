@@ -1,7 +1,9 @@
 package iteration2.ui;
 
-import api.models.*;
 import api.generators.RandomModelGenerator;
+import api.models.CreateUserRequest;
+import api.models.TransferRequest;
+import api.models.TransferResponse;
 import api.requests.steps.UserSteps;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
@@ -16,6 +18,7 @@ import static api.testdata.AccountTestData.EMPTY_ACCOUNT_BALANCE;
 import static api.testdata.AccountTestData.PREPARED_SENDER_BALANCE;
 
 public class TransferTests extends BaseUITest {
+
     @Test
     @UserSession
     public void userCanTransferMoneyWithCorrectDataTest() {
@@ -31,8 +34,7 @@ public class TransferTests extends BaseUITest {
                 .getAccountById(receiverAccountId)
                 .getAccountNumber();
 
-        float transferAmount =
-                RandomModelGenerator.generateValidTransferAmount();
+        float transferAmount = RandomModelGenerator.generateValidTransferAmount();
 
         new UserDashboard()
                 .open()
@@ -44,24 +46,16 @@ public class TransferTests extends BaseUITest {
                 .confirmTransferDetails()
                 .submitTransfer()
                 .checkAlertMessageAndAccept(
-                        BankAlert.GOOD_TRANSFER.format(
-                                transferAmount,
-                                receiverAccountId
-                        )
-                );
+                        BankAlert.GOOD_TRANSFER.format(transferAmount, receiverAccountNumber));
 
-        assertAccountBalance(softy, userSteps, senderAccountId,
-                PREPARED_SENDER_BALANCE - transferAmount);
+        assertAccountBalance(softy, userSteps, senderAccountId, PREPARED_SENDER_BALANCE - transferAmount);
 
-        assertAccountBalance(softy, userSteps, receiverAccountId,
-                EMPTY_ACCOUNT_BALANCE + transferAmount);
+        assertAccountBalance(softy, userSteps, receiverAccountId, EMPTY_ACCOUNT_BALANCE + transferAmount);
     }
 
     @Test
     @UserSession(value = 2, auth = 1)
     public void userCanTransferMoneyToAnotherUserWithCorrectDataTest() {
-        CreateUserRequest senderUser = SessionStorage.getUser(1);
-
         CreateUserRequest receiverUser = SessionStorage.getUser(2);
 
         UserSteps senderSteps = SessionStorage.getSteps(1);
@@ -70,7 +64,8 @@ public class TransferTests extends BaseUITest {
 
         int senderAccountId = senderSteps.createAccount();
 
-        senderSteps.prepareAccountForTransfer(senderAccountId);
+        senderSteps.prepareAccountForTransfer(senderAccountId
+        );
 
         int receiverAccountId = receiverSteps.createAccount();
 
@@ -78,8 +73,7 @@ public class TransferTests extends BaseUITest {
                 .getAccountById(receiverAccountId)
                 .getAccountNumber();
 
-        float transferAmount =
-                RandomModelGenerator.generateValidTransferAmount();
+        float transferAmount = RandomModelGenerator.generateValidTransferAmount();
 
         new UserDashboard()
                 .open()
@@ -91,17 +85,11 @@ public class TransferTests extends BaseUITest {
                 .confirmTransferDetails()
                 .submitTransfer()
                 .checkAlertMessageAndAccept(
-                        BankAlert.GOOD_TRANSFER.format(
-                                transferAmount,
-                                receiverAccountId
-                        )
-                );
+                        BankAlert.GOOD_TRANSFER.format(transferAmount, receiverAccountNumber));
 
-        assertAccountBalance(softy, senderSteps, senderAccountId,
-                PREPARED_SENDER_BALANCE - transferAmount);
+        assertAccountBalance(softy, senderSteps, senderAccountId, PREPARED_SENDER_BALANCE - transferAmount);
 
-        assertAccountBalance(softy, receiverSteps, receiverAccountId,
-                EMPTY_ACCOUNT_BALANCE + transferAmount);
+        assertAccountBalance(softy, receiverSteps, receiverAccountId, EMPTY_ACCOUNT_BALANCE + transferAmount);
     }
 
     @Test
@@ -121,8 +109,7 @@ public class TransferTests extends BaseUITest {
                 .getAccountById(receiverAccountId)
                 .getAccountNumber();
 
-        float negativeTransferAmount =
-                RandomModelGenerator.generateNegativeTransferAmount();
+        float negativeTransferAmount = RandomModelGenerator.generateNegativeTransferAmount();
 
         new UserDashboard()
                 .open()
@@ -134,15 +121,11 @@ public class TransferTests extends BaseUITest {
                 .confirmTransferDetails()
                 .submitTransfer()
                 .checkAlertMessageAndAccept(
-                        BankAlert.AMOUNT_MUST_BE_MORE_THAN_MINIMUM
-                                .getMessage()
-                );
+                        BankAlert.AMOUNT_MUST_BE_MORE_THAN_MINIMUM.getMessage());
 
-        assertAccountBalance(softy, userSteps, senderAccountId,
-                PREPARED_SENDER_BALANCE);
+        assertAccountBalance(softy, userSteps, senderAccountId, PREPARED_SENDER_BALANCE);
 
-        assertAccountBalance(softy, userSteps, receiverAccountId,
-                EMPTY_ACCOUNT_BALANCE);
+        assertAccountBalance(softy, userSteps, receiverAccountId, EMPTY_ACCOUNT_BALANCE);
     }
 
     @Test
@@ -161,11 +144,7 @@ public class TransferTests extends BaseUITest {
         float initialTransferAmount = RandomModelGenerator.generateValidDepositAmount();
 
         TransferRequest initialTransferRequest =
-                transferRequest(
-                        senderAccountId,
-                        receiverAccountId,
-                        initialTransferAmount
-                );
+                transferRequest(senderAccountId, receiverAccountId, initialTransferAmount);
 
         TransferResponse initialTransferResponse = userSteps.transfer(initialTransferRequest);
 
@@ -182,12 +161,8 @@ public class TransferTests extends BaseUITest {
                 .confirmRepeatTransferDetails()
                 .submitRepeatTransfer()
                 .checkAlertMessageAndAccept(
-                        BankAlert.REPEAT_TRANSFER_SUCCESS.format(
-                                initialTransferAmount,
-                                senderAccountId,
-                                receiverAccountId
-                        )
-                );
+                        BankAlert.REPEAT_TRANSFER_SUCCESS.format(initialTransferAmount,
+                                senderAccountId, receiverAccountId));
 
         assertAccountBalance(softy, userSteps, senderAccountId,
                 PREPARED_SENDER_BALANCE - initialTransferAmount * 2);
@@ -206,9 +181,8 @@ public class TransferTests extends BaseUITest {
                 .openTransferPage()
                 .openTransferAgain()
                 .searchTransactions(nonExistingUsername)
-                .checkAlertMessageAndAccept(
-                        BankAlert.NO_MATCHING_USERS_FOUND.getMessage()
-                )
+                .checkAlertMessageAndAccept(BankAlert.NO_MATCHING_USERS_FOUND
+                        .getMessage())
                 .checkSearchResultsAreEmpty();
     }
 
@@ -228,18 +202,13 @@ public class TransferTests extends BaseUITest {
         float initialTransferAmount = RandomModelGenerator.generateValidDepositAmount();
 
         TransferRequest initialTransferRequest =
-                transferRequest(
-                        senderAccountId,
-                        receiverAccountId,
-                        initialTransferAmount
-                );
+                transferRequest(senderAccountId, receiverAccountId, initialTransferAmount);
 
         TransferResponse initialTransferResponse = userSteps.transfer(initialTransferRequest);
 
         assertSuccessfulTransferResponse(softy, initialTransferRequest, initialTransferResponse);
 
-        float invalidRepeatTransferAmount =
-                RandomModelGenerator.generateNegativeTransferAmount();
+        float invalidRepeatTransferAmount = RandomModelGenerator.generateNegativeTransferAmount();
 
         new UserDashboard()
                 .open()
@@ -248,14 +217,11 @@ public class TransferTests extends BaseUITest {
                 .searchTransactions(user.getUsername())
                 .openIncomingTransferForRepeat()
                 .selectRepeatSenderAccount(senderAccountId)
-                .enterRepeatTransferAmount(
-                        invalidRepeatTransferAmount
-                )
+                .enterRepeatTransferAmount(invalidRepeatTransferAmount)
                 .confirmRepeatTransferDetails()
                 .submitRepeatTransfer()
-                .checkAlertMessageAndAccept(
-                        BankAlert.REPEAT_TRANSFER_FAILED.getMessage()
-                );
+                .checkAlertMessageAndAccept(BankAlert.REPEAT_TRANSFER_FAILED
+                                .getMessage());
 
         assertAccountBalance(softy, userSteps, senderAccountId,
                 PREPARED_SENDER_BALANCE - initialTransferAmount);

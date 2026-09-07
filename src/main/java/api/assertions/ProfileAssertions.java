@@ -39,7 +39,7 @@ public class ProfileAssertions {
         );
     }
 
-    private static void assertProfileName(
+    public static void assertProfileName(
             SoftAssertions softy,
             CustomerProfileResponse profile,
             String expectedName

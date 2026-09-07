@@ -14,5 +14,7 @@ public class TransactionResponse {
     private float amount;
     private String type;
     private String timestamp;
+    private String timestampAsString;
     private int relatedAccountId;
+    private Double amountAsDouble;
 }

@@ -1,6 +1,9 @@
 package iteration1.api;
 
+import api.dao.UserDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.generators.RandomModelGenerator;
+import api.requests.steps.DataBaseSteps;
 import iteration2.api.BaseTest;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
@@ -18,17 +21,34 @@ import api.specs.ResponseSpecs;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class CreateUserTest extends BaseTest {
 
     @Test
-    public void adminCanCreateUserWithCorrectData(){
-        CreateUserRequest createUserRequest = RandomModelGenerator.generate(CreateUserRequest.class);
+    public void adminCanCreateUserWithCorrectData() {
+        CreateUserRequest createUserRequest =
+                RandomModelGenerator.generate(CreateUserRequest.class);
 
-        CreateUserResponse createUserResponse = new ValidatedCrudRequester<CreateUserResponse>
-                (RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated())
-                .post(createUserRequest);
+        CreateUserResponse createUserResponse =
+                new ValidatedCrudRequester<CreateUserResponse>(
+                        RequestSpecs.adminSpec(),
+                        Endpoint.ADMIN_USER,
+                        ResponseSpecs.entityWasCreated()
+                )
+                        .post(createUserRequest);
 
-        ModelAssertions.assertThatModels(createUserRequest,createUserResponse).match();
+        registerUserForDeletion(createUserResponse.getId());
+
+        ModelAssertions
+                .assertThatModels(createUserRequest, createUserResponse)
+                .match();
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(createUserResponse.getUsername());
+
+        DaoAndModelAssertions
+                .assertThat(createUserResponse, userDao)
+                .match();
     }
 
     public static Stream<Arguments> userInvalidData(){
@@ -45,15 +65,28 @@ public class CreateUserTest extends BaseTest {
     @ParameterizedTest
     public void adminCanNotCreateUserWithWrongData(String username, String password, String role,
                                                    String errorKey, List<String> errorValues){
-        CreateUserRequest createUserRequest = CreateUserRequest.builder()
-                .username(username)
-                .password(password)
-                .role(role)
-                .build();
+            CreateUserRequest createUserRequest = CreateUserRequest.builder()
+                    .username(username)
+                    .password(password)
+                    .role(role)
+                    .build();
 
-        new CrudRequester(RequestSpecs.adminSpec(),
-                Endpoint.ADMIN_USER,
-                ResponseSpecs.requestReturnsBadRequest(errorKey, errorValues))
-                .post(createUserRequest);
+            new CrudRequester(
+                    RequestSpecs.adminSpec(),
+                    Endpoint.ADMIN_USER,
+                    ResponseSpecs.requestReturnsBadRequest(errorKey, errorValues)
+            )
+                    .post(createUserRequest);
+
+            UserDao userDao = DataBaseSteps.getUserByUsername(username);
+
+            // если вдруг бек все-таки создаст пользователя и ошибки не будет - мы удалим пользователя
+            if (userDao != null) {
+                registerUserForDeletion(userDao.getId());
+            }
+
+            assertThat(userDao)
+                    .as("User with invalid data should not be created in database")
+                    .isNull();
     }
 }

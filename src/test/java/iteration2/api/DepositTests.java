@@ -1,6 +1,9 @@
 package iteration2.api;
 
+import api.dao.AccountDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.generators.RandomModelGenerator;
+import api.requests.steps.DataBaseSteps;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import api.models.AccountResponse;
@@ -25,24 +28,40 @@ import static api.factories.DepositRequestFactory.depositRequestWithAmount;
 import static api.factories.DepositRequestFactory.validDepositRequest;
 
 public class DepositTests extends BaseTest {
+
     @Test
     public void userCanDepositWithRandomCorrectAmount() {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
 
         DepositRequest depositRequest = validDepositRequest(accountId);
 
-        AccountResponse depositResponse = new ValidatedCrudRequester<AccountResponse>(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.requestReturnsOk()
-        ).post(depositRequest);
+        AccountResponse depositResponse =
+                new ValidatedCrudRequester<AccountResponse>(
+                        userSpec,
+                        Endpoint.DEPOSIT,
+                        ResponseSpecs.requestReturnsOk()
+                ).post(depositRequest);
 
-        ModelAssertions.assertThatModels(depositRequest, depositResponse).match();
+        ModelAssertions
+                .assertThatModels(
+                        depositRequest,
+                        depositResponse
+                )
+                .match();
 
-        assertAccountAfterSuccessfulDeposit(softy, userSpec, depositRequest);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountAfterSuccessfulDeposit(softy, accountResponse, depositRequest);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     public static Stream<Arguments> correctBoundaryDepositData() {
@@ -55,29 +74,49 @@ public class DepositTests extends BaseTest {
 
     @MethodSource("correctBoundaryDepositData")
     @ParameterizedTest
-    public void userCanDepositWithBoundaryCorrectAmount(float depositAmount) {
+    public void userCanDepositWithBoundaryCorrectAmount(
+            float depositAmount
+    ) {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
 
         DepositRequest depositRequest = depositRequestWithAmount(accountId, depositAmount);
 
-        AccountResponse depositResponse = new ValidatedCrudRequester<AccountResponse>(
-                userSpec,
-                Endpoint.DEPOSIT,
-                ResponseSpecs.requestReturnsOk()
-        ).post(depositRequest);
+        AccountResponse depositResponse =
+                new ValidatedCrudRequester<AccountResponse>(
+                        userSpec,
+                        Endpoint.DEPOSIT,
+                        ResponseSpecs.requestReturnsOk()
+                ).post(depositRequest);
 
-        ModelAssertions.assertThatModels(depositRequest, depositResponse).match();
+        ModelAssertions
+                .assertThatModels(depositRequest, depositResponse)
+                .match();
 
-        assertAccountAfterSuccessfulDeposit(softy, userSpec, depositRequest);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountAfterSuccessfulDeposit(softy, accountResponse, depositRequest);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     public static Stream<Arguments> incorrectBoundaryDepositData() {
         return Stream.of(
-                Arguments.of(0f, ResponseSpecs.depositAmountLessThanMin()),
-                Arguments.of(5000.01f, ResponseSpecs.depositAmountMoreThanMax())
+                Arguments.of(
+                        0f,
+                        ResponseSpecs.depositAmountLessThanMin()
+                ),
+                Arguments.of(
+                        5000.01f,
+                        ResponseSpecs.depositAmountMoreThanMax()
+                )
         );
     }
 
@@ -86,6 +125,7 @@ public class DepositTests extends BaseTest {
     public void userCannotDepositWithBoundaryIncorrectAmount(float depositAmount,
                                                              ResponseSpecification responseSpecification) {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
@@ -98,7 +138,15 @@ public class DepositTests extends BaseTest {
                 responseSpecification
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountIsEmpty(softy, accountResponse, accountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     public static Stream<Arguments> incorrectRandomDepositData() {
@@ -117,8 +165,9 @@ public class DepositTests extends BaseTest {
     @MethodSource("incorrectRandomDepositData")
     @ParameterizedTest
     public void userCannotDepositWithRandomIncorrectAmount(float depositAmount,
-                                                           ResponseSpecification responseSpecification) {
+            ResponseSpecification responseSpecification) {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
@@ -131,18 +180,26 @@ public class DepositTests extends BaseTest {
                 responseSpecification
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountIsEmpty(softy, accountResponse, accountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     @Test
     public void userCannotDepositWithNonExistingAccount() {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
 
-        int nonExistingAccountId =
-                RandomModelGenerator.generateNonExistingAccountIdBasedOn(accountId);
+        int nonExistingAccountId = RandomModelGenerator.generateNonExistingAccountIdBasedOn(accountId);
 
         DepositRequest depositRequest = validDepositRequest(nonExistingAccountId);
 
@@ -152,7 +209,15 @@ public class DepositTests extends BaseTest {
                 ResponseSpecs.unauthorizedAccessToAccount()
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountIsEmpty(softy, accountResponse, accountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     @Test
@@ -160,6 +225,7 @@ public class DepositTests extends BaseTest {
         RequestSpecification firstUserSpec = createUserSpecForTest();
 
         RequestSpecification secondUserSpec = createUserSpecForTest();
+
         int secondUserAccountId = AccountSteps.createAccount(secondUserSpec);
 
         assertAccountIsEmpty(softy, secondUserSpec, secondUserAccountId);
@@ -172,12 +238,21 @@ public class DepositTests extends BaseTest {
                 ResponseSpecs.unauthorizedAccessToAccount()
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, secondUserSpec, secondUserAccountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(secondUserSpec, secondUserAccountId);
+
+        assertAccountIsEmpty(softy, accountResponse, secondUserAccountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) secondUserAccountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     @Test
     public void userCannotDepositWithWrongAuthorizationToken() {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
@@ -190,12 +265,21 @@ public class DepositTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountIsEmpty(softy, accountResponse, accountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 
     @Test
     public void userCannotDepositWithoutAuthorization() {
         RequestSpecification userSpec = createUserSpecForTest();
+
         int accountId = AccountSteps.createAccount(userSpec);
 
         assertAccountIsEmpty(softy, userSpec, accountId);
@@ -208,7 +292,14 @@ public class DepositTests extends BaseTest {
                 ResponseSpecs.unauthorized()
         ).post(depositRequest);
 
-        assertAccountIsEmpty(softy, userSpec, accountId);
+        AccountResponse accountResponse = AccountSteps.getAccountById(userSpec, accountId);
+
+        assertAccountIsEmpty(softy, accountResponse, accountId);
+
+        AccountDao accountDao = DataBaseSteps.getAccountById((long) accountId);
+
+        DaoAndModelAssertions
+                .assertThat(accountResponse, accountDao)
+                .match();
     }
 }
-
