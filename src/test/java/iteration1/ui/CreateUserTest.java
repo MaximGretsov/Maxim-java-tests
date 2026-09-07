@@ -40,7 +40,7 @@ public class CreateUserTest extends BaseUITest {
     @AdminSession
     public void adminCannotCreateUserWithInvalidDataTest(){
         CreateUserRequest newUser = RandomModelGenerator.generate(CreateUserRequest.class);
-        newUser.setUsername("a");
+        newUser.setUsername(RandomModelGenerator.generateInvalidName());
 
         assertTrue(new AdminPanel().open().createUser(newUser.getUsername(), newUser.getPassword())
                 .checkAlertMessageAndAccept(BankAlert.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS.getMessage())

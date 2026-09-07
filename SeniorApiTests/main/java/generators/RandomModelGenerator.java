@@ -1,4 +1,4 @@
-package api.generators;
+package generators;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 
@@ -856,7 +856,7 @@ public final class RandomModelGenerator {
 
     // Метод для генерации слова в имени в профиля
     private static String generateRandomLettersWord() {
-        int wordLength = RANDOM.nextInt(3, 5);
+        int wordLength = RANDOM.nextInt(3, 11);
         String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         StringBuilder word = new StringBuilder();
 
@@ -920,18 +920,5 @@ public final class RandomModelGenerator {
         int spacesCount = RANDOM.nextInt(2, 11);
 
         return " ".repeat(spacesCount);
-    }
-
-    public static String generateInvalidName() {
-        int wordLength = RANDOM.nextInt(1, 2);
-        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        StringBuilder word = new StringBuilder();
-
-        for (int i = 0; i < wordLength; i++) {
-            int randomIndex = RANDOM.nextInt(letters.length());
-            word.append(letters.charAt(randomIndex));
-        }
-
-        return word.toString();
     }
 }
