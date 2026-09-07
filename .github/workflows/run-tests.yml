@@ -1,0 +1,198 @@
+name: Run tests
+
+on:
+  push:
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-tests:
+    name: Set up services and run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '21'
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Prepare scripts
+        run: |
+          chmod +x ./mvnw
+          chmod +x ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline
+
+      - name: Pull Chrome image for Selenoid
+        run: docker pull selenoid/vnc_chrome:128.0
+
+      - name: Set up services
+        run: docker compose -f infra/docker-compose.yml up -d
+
+      - name: Wait for services
+        run: |
+          for attempt in {1..60}; do
+            BACKEND_READY=false
+            FRONTEND_READY=false
+            SELENOID_READY=false
+
+            if curl -fsS http://localhost:4111/v3/api-docs > /dev/null; then
+              BACKEND_READY=true
+            fi
+
+            if curl -fsS http://localhost:3000 > /dev/null; then
+              FRONTEND_READY=true
+            fi
+
+            if curl -fsS http://localhost:4444/status > /dev/null; then
+              SELENOID_READY=true
+            fi
+
+            if [ "$BACKEND_READY" = true ] &&
+               [ "$FRONTEND_READY" = true ] &&
+               [ "$SELENOID_READY" = true ]; then
+              echo "All services are ready"
+              docker compose -f infra/docker-compose.yml ps
+              exit 0
+            fi
+
+            echo "Waiting for services: attempt $attempt/60"
+            sleep 2
+          done
+
+          echo "::error::Services did not start in time"
+          docker compose -f infra/docker-compose.yml ps
+          docker compose -f infra/docker-compose.yml logs --no-color
+          exit 1
+
+      - name: Run tests
+        run: ./mvnw clean test -q
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://nginx
+          APIVERSION: /api/v1
+
+      - name: Run Swagger coverage
+        if: always()
+        run: |
+          if [ -d "swagger-coverage-output" ] &&
+             [ -n "$(find swagger-coverage-output -type f -print -quit)" ]; then
+
+            bash ./.swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline \
+              -s http://localhost:4111/v3/api-docs \
+              -i swagger-coverage-output
+          else
+            echo "::warning::Swagger coverage output was not created"
+          fi
+
+      - name: Load test report history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure report
+        uses: simple-elf/allure-report-action@v1.15
+        if: always()
+        with:
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          subfolder: test-report
+          keep_reports: 20
+
+      - name: Fix report directory permissions
+        if: always()
+        run: |
+          for directory in allure-history allure-report gh-pages; do
+            if [ -e "$directory" ]; then
+              sudo chown -R "$(id -u):$(id -g)" "$directory"
+            fi
+          done
+
+      - name: Arrange reports
+        if: always()
+        shell: bash
+        run: |
+          RUN_DIR="allure-history/test-report/${{ github.run_number }}"
+          ALLURE_DIR="$RUN_DIR/allure-report"
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage"
+
+          mkdir -p "$ALLURE_DIR"
+          mkdir -p "$SWAGGER_DIR"
+
+          shopt -s dotglob nullglob
+
+          for item in "$RUN_DIR"/*; do
+            item_name="$(basename "$item")"
+
+            if [ "$item_name" = "allure-report" ] ||
+               [ "$item_name" = "swagger-coverage" ]; then
+              continue
+            fi
+
+            mv "$item" "$ALLURE_DIR/"
+          done
+
+          if [ -f "swagger-coverage-report.html" ]; then
+            cp swagger-coverage-report.html \
+              "$SWAGGER_DIR/index.html"
+          else
+            echo "::warning::Swagger coverage HTML report was not created"
+          fi
+
+          if [ -f "swagger-coverage-results.json" ]; then
+            cp swagger-coverage-results.json \
+              "$SWAGGER_DIR/swagger-coverage-results.json"
+          else
+            echo "::warning::Swagger coverage JSON report was not created"
+          fi
+
+          cat > "$RUN_DIR/index.html" <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=allure-report/index.html">
+            <title>Test reports</title>
+          </head>
+          <body>
+            <p>
+              <a href="allure-report/index.html">Open Allure report</a>
+            </p>
+            <p>
+              <a href="swagger-coverage/index.html">Open Swagger coverage report</a>
+            </p>
+          </body>
+          </html>
+          EOF
+
+      - name: Publish test reports
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Clean up services
+        if: always()
+        run: |
+          docker compose -f infra/docker-compose.yml down --remove-orphans

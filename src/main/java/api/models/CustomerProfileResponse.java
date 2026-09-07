@@ -1,0 +1,21 @@
+package api.models;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CustomerProfileResponse extends BaseModel{
+    private int id;
+    private String username;
+    private String name;
+    private String password;
+    private String role;
+    private List<Object> accounts;
+}
